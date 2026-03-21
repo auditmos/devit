@@ -1,4 +1,5 @@
 import { resolve } from "node:path";
+import { loadEnv } from "vite";
 import { defineProject } from "vitest/config";
 
 export default defineProject({
@@ -7,5 +8,6 @@ export default defineProject({
 		globals: true,
 		include: ["src/**/*.test.ts"],
 		exclude: ["src/drizzle/migrations/**"],
+		env: loadEnv("dev", import.meta.dirname, ""),
 	},
 });

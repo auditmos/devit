@@ -11,6 +11,10 @@
 			"types": "./dist/health/index.d.ts",
 			"default": "./dist/health/index.js"
 		},
+		"./project": {
+			"types": "./dist/project/index.d.ts",
+			"default": "./dist/project/index.js"
+		},
 		"./auth/*": {
 			"types": "./dist/auth/*.d.ts",
 			"default": "./dist/auth/*.js"
