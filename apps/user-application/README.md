@@ -1,4 +1,4 @@
-# SaaS-on-CF (Software as a Service on Cloudflare) - User Application
+# devit (Software as a Service on Cloudflare) - User Application
 
 Modular web application template - user application (frontend package)
 
@@ -557,15 +557,15 @@ The application connects to `data-service` via **Cloudflare service bindings** -
 "services": [
   {
     "binding": "DATA_SERVICE",
-    "service": "saas-on-cf-ds-dev"
+    "service": "devit-ds-dev"
   }
 ]
 ```
 
 **Configuration per environment:**
-- **dev**: `saas-on-cf-ds-dev`
-- **staging**: `saas-on-cf-ds-staging`
-- **production**: `saas-on-cf-ds-production`
+- **dev**: `devit-ds-dev`
+- **staging**: `devit-ds-staging`
+- **production**: `devit-ds-production`
 
 **Usage in code:**
 ```typescript

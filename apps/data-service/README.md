@@ -1,4 +1,4 @@
-# SaaS-on-CF (Software as a Service on Cloudflare) - Data Service
+# devit (Software as a Service on Cloudflare) - Data Service
 
 Modular web application template - data service (backend package)
 

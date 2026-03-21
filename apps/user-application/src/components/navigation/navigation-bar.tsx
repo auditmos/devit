@@ -109,7 +109,7 @@ export function NavigationBar() {
 						<div className="ml-2 pl-2 border-l border-border/30 flex items-center gap-1">
 							<Button variant="ghost" size="icon" asChild>
 								<a
-									href="https://github.com/auditmos/saas-on-cf"
+									href="https://github.com/auditmos/devit"
 									target="_blank"
 									rel="noopener noreferrer"
 								>
@@ -151,7 +151,7 @@ export function NavigationBar() {
 					<div className="lg:hidden flex items-center space-x-1">
 						<Button variant="ghost" size="icon" asChild>
 							<a
-								href="https://github.com/auditmos/saas-on-cf"
+								href="https://github.com/auditmos/devit"
 								target="_blank"
 								rel="noopener noreferrer"
 							>

@@ -1,4 +1,4 @@
-# Contributing to SaaS-on-CF (Software as a Service on Cloudflare)
+# Contributing to devit (Software as a Service on Cloudflare)
 
 Thanks for your interest in contributing to SaaS-on-CF (Software as a Service on Cloudflare)! 
 This guide will help you get started.

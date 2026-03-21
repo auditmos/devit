@@ -17,7 +17,7 @@ const navigation = {
 	social: [
 		{
 			name: "GitHub",
-			href: "https://github.com/auditmos/saas-on-cf",
+			href: "https://github.com/auditmos/devit",
 			icon: FaGithub,
 		},
 		{

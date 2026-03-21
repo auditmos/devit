@@ -15,7 +15,7 @@ declare namespace Cloudflare {
 		VITE_DATA_SERVICE_URL: string;
 		VITE_API_TOKEN: string;
 		DATA_SERVICE_API_TOKEN: string;
-		DATA_SERVICE: Fetcher /* saas-on-cf-ds-dev */;
+		DATA_SERVICE: Fetcher /* devit-ds-dev */;
 	}
 }
 interface Env extends Cloudflare.Env {}

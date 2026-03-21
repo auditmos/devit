@@ -1,4 +1,4 @@
-# SaaS-on-CF (Software as a Service on Cloudflare)
+# devit (Software as a Service on Cloudflare)
 
 Modular web application template
 
