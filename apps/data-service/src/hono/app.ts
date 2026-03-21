@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import clients from "./handlers/client-handlers";
 import health from "./handlers/health-handlers";
+import projects from "./handlers/project-handlers";
 import { createCorsMiddleware } from "./middleware/cors";
 import { onErrorHandler } from "./middleware/error-handler";
 import { requestId } from "./middleware/request-id";
@@ -13,3 +14,4 @@ App.use("*", createCorsMiddleware());
 
 App.route("/health", health);
 App.route("/clients", clients);
+App.route("/projects", projects);
