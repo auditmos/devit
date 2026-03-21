@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/auditmos/devit/compare/v1.0.0...v1.1.0) (2026-03-21)
+
+
+### Features
+
+* add DB schema and project management API ([#2](https://github.com/auditmos/devit/issues/2)) ([9710fbd](https://github.com/auditmos/devit/commit/9710fbdc47ba604ffb219ea41ed25f4eab318b5c))
+
 # 1.0.0 (2026-03-21)
 
 
