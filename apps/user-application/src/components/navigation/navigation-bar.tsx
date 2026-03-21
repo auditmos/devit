@@ -150,11 +150,7 @@ export function NavigationBar() {
 					{/* Mobile Menu Button + Theme Toggle */}
 					<div className="lg:hidden flex items-center space-x-1">
 						<Button variant="ghost" size="icon" asChild>
-							<a
-								href="https://github.com/auditmos/devit"
-								target="_blank"
-								rel="noopener noreferrer"
-							>
+							<a href="https://github.com/auditmos/devit" target="_blank" rel="noopener noreferrer">
 								<Github className="h-4 w-4 text-foreground" />
 								<span className="sr-only">GitHub</span>
 							</a>
