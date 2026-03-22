@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/auditmos/devit/compare/v1.1.0...v1.2.0) (2026-03-22)
+
+
+### Features
+
+* add client chat interface & AI integration ([#3](https://github.com/auditmos/devit/issues/3)) ([37be42a](https://github.com/auditmos/devit/commit/37be42aef14746f12decf9e2d5034e1de2f51da0))
+
 # [1.1.0](https://github.com/auditmos/devit/compare/v1.0.0...v1.1.0) (2026-03-21)
 
 
