@@ -13,6 +13,11 @@ projects.get("/", zValidator("query", PaginationRequestSchema), async (c) => {
 	return resultToResponse(c, await projectService.getProjects(query));
 });
 
+projects.get("/:slug/messages", zValidator("param", SlugParamSchema), async (c) => {
+	const { slug } = c.req.valid("param");
+	return resultToResponse(c, await projectService.getProjectMessages(slug));
+});
+
 projects.get("/:slug", zValidator("param", SlugParamSchema), async (c) => {
 	const { slug } = c.req.valid("param");
 	return resultToResponse(c, await projectService.getProjectBySlug(slug));

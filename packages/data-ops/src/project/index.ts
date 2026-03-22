@@ -9,6 +9,7 @@ export {
 export type {
 	Message,
 	MessageCreateInput,
+	MessageListResponse,
 	Project,
 	ProjectCreateInput,
 	ProjectListResponse,
@@ -17,6 +18,7 @@ export type {
 } from "./schema";
 export {
 	MessageCreateRequestSchema,
+	MessageListResponseSchema,
 	MessageSchema,
 	ProjectCreateRequestSchema,
 	ProjectListResponseSchema,

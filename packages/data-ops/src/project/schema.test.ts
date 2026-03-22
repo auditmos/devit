@@ -1,4 +1,9 @@
-import { MessageCreateRequestSchema, ProjectCreateRequestSchema, SlugParamSchema } from "./schema";
+import {
+	MessageCreateRequestSchema,
+	MessageListResponseSchema,
+	ProjectCreateRequestSchema,
+	SlugParamSchema,
+} from "./schema";
 
 describe("MessageCreateRequestSchema", () => {
 	it("accepts valid content", () => {
@@ -59,6 +64,58 @@ describe("SlugParamSchema", () => {
 
 	it("rejects missing slug", () => {
 		const result = SlugParamSchema.safeParse({});
+		expect(result.success).toBe(false);
+	});
+});
+
+describe("MessageListResponseSchema", () => {
+	it("accepts valid message list response", () => {
+		const result = MessageListResponseSchema.safeParse({
+			data: [
+				{
+					id: "550e8400-e29b-41d4-a716-446655440000",
+					projectId: "550e8400-e29b-41d4-a716-446655440001",
+					role: "user",
+					content: "Hello, I need help with my project",
+					phase: null,
+					createdAt: "2026-03-20T10:00:00.000Z",
+				},
+				{
+					id: "550e8400-e29b-41d4-a716-446655440002",
+					projectId: "550e8400-e29b-41d4-a716-446655440001",
+					role: "assistant",
+					content: "Sure, how can I help?",
+					phase: "discovery",
+					createdAt: "2026-03-20T10:01:00.000Z",
+				},
+			],
+		});
+		expect(result.success).toBe(true);
+	});
+
+	it("accepts empty data array", () => {
+		const result = MessageListResponseSchema.safeParse({ data: [] });
+		expect(result.success).toBe(true);
+	});
+
+	it("rejects invalid message role", () => {
+		const result = MessageListResponseSchema.safeParse({
+			data: [
+				{
+					id: "550e8400-e29b-41d4-a716-446655440000",
+					projectId: "550e8400-e29b-41d4-a716-446655440001",
+					role: "admin",
+					content: "test",
+					phase: null,
+					createdAt: "2026-03-20T10:00:00.000Z",
+				},
+			],
+		});
+		expect(result.success).toBe(false);
+	});
+
+	it("rejects missing data field", () => {
+		const result = MessageListResponseSchema.safeParse({});
 		expect(result.success).toBe(false);
 	});
 });

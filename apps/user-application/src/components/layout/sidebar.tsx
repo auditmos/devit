@@ -1,5 +1,5 @@
 import { useNavigate, useRouterState } from "@tanstack/react-router";
-import { Globe, Home, Menu } from "lucide-react";
+import { FolderKanban, Home, Menu } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -19,9 +19,9 @@ const navigationItems: NavigationItem[] = [
 		href: "/",
 	},
 	{
-		name: "Dashboard",
-		icon: Globe,
-		href: "/dashboard",
+		name: "Projects",
+		icon: FolderKanban,
+		href: "/app",
 	},
 ];
 
@@ -65,7 +65,7 @@ export function Sidebar({ className }: SidebarProps) {
 						{navigationItems.map((item) => {
 							const isActive =
 								currentPath === item.href ||
-								(item.href !== "/dashboard" && currentPath.startsWith(item.href));
+								(item.href !== "/" && currentPath.startsWith(item.href));
 
 							return (
 								<Button

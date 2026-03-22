@@ -78,6 +78,10 @@ export const MessageCreateRequestSchema = z.object({
 	content: z.string().min(1, "Content is required"),
 });
 
+export const MessageListResponseSchema = z.object({
+	data: z.array(MessageSchema),
+});
+
 // ============================================
 // Types
 // ============================================
@@ -89,3 +93,4 @@ export type Task = z.infer<typeof TaskSchema>;
 export type ProjectCreateInput = z.infer<typeof ProjectCreateRequestSchema>;
 export type MessageCreateInput = z.infer<typeof MessageCreateRequestSchema>;
 export type ProjectListResponse = z.infer<typeof ProjectListResponseSchema>;
+export type MessageListResponse = z.infer<typeof MessageListResponseSchema>;

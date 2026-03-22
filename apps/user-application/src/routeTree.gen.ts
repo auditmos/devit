@@ -40,6 +40,7 @@ import { Route as AuthDashboardApiReadRouteImport } from './routes/_auth/dashboa
 import { Route as AuthDashboardApiListRouteImport } from './routes/_auth/dashboard/api/list'
 import { Route as AuthDashboardApiDeleteRouteImport } from './routes/_auth/dashboard/api/delete'
 import { Route as AuthDashboardApiCreateRouteImport } from './routes/_auth/dashboard/api/create'
+import { Route as AuthAppProjectsSlugRouteImport } from './routes/_auth/app/projects/$slug'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -207,6 +208,11 @@ const AuthDashboardApiCreateRoute = AuthDashboardApiCreateRouteImport.update({
   path: '/create',
   getParentRoute: () => AuthDashboardApiRouteRoute,
 } as any)
+const AuthAppProjectsSlugRoute = AuthAppProjectsSlugRouteImport.update({
+  id: '/app/projects/$slug',
+  path: '/app/projects/$slug',
+  getParentRoute: () => AuthRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -221,6 +227,7 @@ export interface FileRoutesByFullPath {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/app/': typeof AuthAppIndexRoute
   '/dashboard/': typeof AuthDashboardIndexRoute
+  '/app/projects/$slug': typeof AuthAppProjectsSlugRoute
   '/dashboard/api/create': typeof AuthDashboardApiCreateRoute
   '/dashboard/api/delete': typeof AuthDashboardApiDeleteRoute
   '/dashboard/api/list': typeof AuthDashboardApiListRoute
@@ -249,6 +256,7 @@ export interface FileRoutesByTo {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/app': typeof AuthAppIndexRoute
   '/dashboard': typeof AuthDashboardIndexRoute
+  '/app/projects/$slug': typeof AuthAppProjectsSlugRoute
   '/dashboard/api/create': typeof AuthDashboardApiCreateRoute
   '/dashboard/api/delete': typeof AuthDashboardApiDeleteRoute
   '/dashboard/api/list': typeof AuthDashboardApiListRoute
@@ -283,6 +291,7 @@ export interface FileRoutesById {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/_auth/app/': typeof AuthAppIndexRoute
   '/_auth/dashboard/': typeof AuthDashboardIndexRoute
+  '/_auth/app/projects/$slug': typeof AuthAppProjectsSlugRoute
   '/_auth/dashboard/api/create': typeof AuthDashboardApiCreateRoute
   '/_auth/dashboard/api/delete': typeof AuthDashboardApiDeleteRoute
   '/_auth/dashboard/api/list': typeof AuthDashboardApiListRoute
@@ -317,6 +326,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/app/'
     | '/dashboard/'
+    | '/app/projects/$slug'
     | '/dashboard/api/create'
     | '/dashboard/api/delete'
     | '/dashboard/api/list'
@@ -345,6 +355,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/app'
     | '/dashboard'
+    | '/app/projects/$slug'
     | '/dashboard/api/create'
     | '/dashboard/api/delete'
     | '/dashboard/api/list'
@@ -378,6 +389,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/_auth/app/'
     | '/_auth/dashboard/'
+    | '/_auth/app/projects/$slug'
     | '/_auth/dashboard/api/create'
     | '/_auth/dashboard/api/delete'
     | '/_auth/dashboard/api/list'
@@ -627,6 +639,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthDashboardApiCreateRouteImport
       parentRoute: typeof AuthDashboardApiRouteRoute
     }
+    '/_auth/app/projects/$slug': {
+      id: '/_auth/app/projects/$slug'
+      path: '/app/projects/$slug'
+      fullPath: '/app/projects/$slug'
+      preLoaderRoute: typeof AuthAppProjectsSlugRouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
   }
 }
 
@@ -721,11 +740,13 @@ const AuthDashboardRouteRouteWithChildren =
 interface AuthRouteRouteChildren {
   AuthDashboardRouteRoute: typeof AuthDashboardRouteRouteWithChildren
   AuthAppIndexRoute: typeof AuthAppIndexRoute
+  AuthAppProjectsSlugRoute: typeof AuthAppProjectsSlugRoute
 }
 
 const AuthRouteRouteChildren: AuthRouteRouteChildren = {
   AuthDashboardRouteRoute: AuthDashboardRouteRouteWithChildren,
   AuthAppIndexRoute: AuthAppIndexRoute,
+  AuthAppProjectsSlugRoute: AuthAppProjectsSlugRoute,
 }
 
 const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(

@@ -1,8 +1,10 @@
 import type { PaginationRequest } from "@repo/data-ops/client";
 import {
 	createProject as createProjectQuery,
+	getMessagesByProjectId,
 	getProjectBySlug as getProjectBySlugQuery,
 	getProjects as getProjectsQuery,
+	type MessageListResponse,
 	type Project,
 	type ProjectCreateInput,
 	type ProjectListResponse,
@@ -51,4 +53,15 @@ export async function getProjectBySlug(slug: string): Promise<Result<Project>> {
 export async function getProjects(params: PaginationRequest): Promise<Result<ProjectListResponse>> {
 	const data = await getProjectsQuery(params);
 	return { ok: true, data };
+}
+
+export async function getProjectMessages(slug: string): Promise<Result<MessageListResponse>> {
+	const project = await getProjectBySlugQuery(slug);
+	if (!project)
+		return {
+			ok: false,
+			error: { code: "NOT_FOUND", message: "Project not found", status: 404 },
+		};
+	const data = await getMessagesByProjectId(project.id);
+	return { ok: true, data: { data } };
 }
