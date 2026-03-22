@@ -1,6 +1,14 @@
-export { createProject, deleteProject, getProjectBySlug, getProjects } from "./queries";
+export {
+	createMessage,
+	createProject,
+	deleteProject,
+	getMessagesByProjectId,
+	getProjectBySlug,
+	getProjects,
+} from "./queries";
 export type {
 	Message,
+	MessageCreateInput,
 	Project,
 	ProjectCreateInput,
 	ProjectListResponse,
@@ -8,6 +16,7 @@ export type {
 	Task,
 } from "./schema";
 export {
+	MessageCreateRequestSchema,
 	MessageSchema,
 	ProjectCreateRequestSchema,
 	ProjectListResponseSchema,

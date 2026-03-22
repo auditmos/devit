@@ -1,6 +1,12 @@
 import { eq } from "drizzle-orm";
 import { getDb, initDatabase } from "@/database/setup";
-import { createProject, getProjectBySlug, getProjects } from "./queries";
+import {
+	createMessage,
+	createProject,
+	getMessagesByProjectId,
+	getProjectBySlug,
+	getProjects,
+} from "./queries";
 import { projects } from "./table";
 
 beforeAll(() => {
@@ -66,5 +72,60 @@ describe("getProjects", () => {
 		const db = getDb();
 		await db.delete(projects).where(eq(projects.id, p1.id));
 		await db.delete(projects).where(eq(projects.id, p2.id));
+	});
+});
+
+describe("createMessage", () => {
+	it("persists a message and returns it with generated id and timestamps", async () => {
+		const project = await createProject({ name: "__test_project__" });
+
+		const message = await createMessage({
+			projectId: project.id,
+			role: "user",
+			content: "Hello, I need help",
+		});
+
+		expect(message.id).toBeDefined();
+		expect(message.projectId).toBe(project.id);
+		expect(message.role).toBe("user");
+		expect(message.content).toBe("Hello, I need help");
+		expect(message.createdAt).toBeInstanceOf(Date);
+
+		// cleanup via cascade
+		const db = getDb();
+		await db.delete(projects).where(eq(projects.id, project.id));
+	});
+});
+
+describe("getMessagesByProjectId", () => {
+	it("returns messages ordered by createdAt ascending", async () => {
+		const project = await createProject({ name: "__test_project__" });
+
+		await createMessage({ projectId: project.id, role: "user", content: "First" });
+		await createMessage({ projectId: project.id, role: "assistant", content: "Second" });
+		await createMessage({ projectId: project.id, role: "user", content: "Third" });
+
+		const result = await getMessagesByProjectId(project.id);
+		expect(result).toHaveLength(3);
+		expect(result[0]?.content).toBe("First");
+		expect(result[1]?.content).toBe("Second");
+		expect(result[2]?.content).toBe("Third");
+		expect(result[0]?.role).toBe("user");
+		expect(result[1]?.role).toBe("assistant");
+
+		// cleanup via cascade
+		const db = getDb();
+		await db.delete(projects).where(eq(projects.id, project.id));
+	});
+
+	it("returns empty array for project with no messages", async () => {
+		const project = await createProject({ name: "__test_project__" });
+
+		const result = await getMessagesByProjectId(project.id);
+		expect(result).toEqual([]);
+
+		// cleanup
+		const db = getDb();
+		await db.delete(projects).where(eq(projects.id, project.id));
 	});
 });

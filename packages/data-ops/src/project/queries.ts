@@ -1,9 +1,42 @@
-import { count, eq } from "drizzle-orm";
+import { asc, count, eq } from "drizzle-orm";
 import type { PaginationRequest } from "@/client/schema";
 import { getDb } from "@/database/setup";
-import type { Project, ProjectCreateInput, ProjectListResponse } from "./schema";
+import type {
+	Message,
+	MessageCreateInput,
+	Project,
+	ProjectCreateInput,
+	ProjectListResponse,
+} from "./schema";
 import { generateSlug } from "./slug";
-import { projects } from "./table";
+import { messages, projects } from "./table";
+
+export async function createMessage(
+	data: MessageCreateInput & { projectId: string; role: Message["role"] },
+): Promise<Message> {
+	const db = getDb();
+	const [message] = await db
+		.insert(messages)
+		.values({
+			projectId: data.projectId,
+			role: data.role,
+			content: data.content,
+		})
+		.returning();
+	if (!message) {
+		throw new Error("Failed to create message");
+	}
+	return message;
+}
+
+export async function getMessagesByProjectId(projectId: string): Promise<Message[]> {
+	const db = getDb();
+	return db
+		.select()
+		.from(messages)
+		.where(eq(messages.projectId, projectId))
+		.orderBy(asc(messages.createdAt));
+}
 
 export async function createProject(data: ProjectCreateInput): Promise<Project> {
 	const db = getDb();
