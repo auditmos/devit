@@ -13,6 +13,7 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SigninRouteImport } from './routes/signin'
 import { Route as AuthRouteRouteImport } from './routes/_auth/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PSlugRouteImport } from './routes/p/$slug'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as AuthDashboardRouteRouteImport } from './routes/_auth/dashboard/route'
 import { Route as AuthDashboardIndexRouteImport } from './routes/_auth/dashboard/index'
@@ -57,6 +58,11 @@ const AuthRouteRoute = AuthRouteRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PSlugRoute = PSlugRouteImport.update({
+  id: '/p/$slug',
+  path: '/p/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiHealthRoute = ApiHealthRouteImport.update({
@@ -208,6 +214,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/dashboard': typeof AuthDashboardRouteRouteWithChildren
   '/api/health': typeof ApiHealthRoute
+  '/p/$slug': typeof PSlugRoute
   '/dashboard/api': typeof AuthDashboardApiRouteRouteWithChildren
   '/dashboard/binding': typeof AuthDashboardBindingRouteRouteWithChildren
   '/dashboard/direct': typeof AuthDashboardDirectRouteRouteWithChildren
@@ -238,6 +245,7 @@ export interface FileRoutesByTo {
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
   '/api/health': typeof ApiHealthRoute
+  '/p/$slug': typeof PSlugRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/app': typeof AuthAppIndexRoute
   '/dashboard': typeof AuthDashboardIndexRoute
@@ -268,6 +276,7 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/_auth/dashboard': typeof AuthDashboardRouteRouteWithChildren
   '/api/health': typeof ApiHealthRoute
+  '/p/$slug': typeof PSlugRoute
   '/_auth/dashboard/api': typeof AuthDashboardApiRouteRouteWithChildren
   '/_auth/dashboard/binding': typeof AuthDashboardBindingRouteRouteWithChildren
   '/_auth/dashboard/direct': typeof AuthDashboardDirectRouteRouteWithChildren
@@ -301,6 +310,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/dashboard'
     | '/api/health'
+    | '/p/$slug'
     | '/dashboard/api'
     | '/dashboard/binding'
     | '/dashboard/direct'
@@ -331,6 +341,7 @@ export interface FileRouteTypes {
     | '/signin'
     | '/signup'
     | '/api/health'
+    | '/p/$slug'
     | '/api/auth/$'
     | '/app'
     | '/dashboard'
@@ -360,6 +371,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/_auth/dashboard'
     | '/api/health'
+    | '/p/$slug'
     | '/_auth/dashboard/api'
     | '/_auth/dashboard/binding'
     | '/_auth/dashboard/direct'
@@ -392,6 +404,7 @@ export interface RootRouteChildren {
   SigninRoute: typeof SigninRoute
   SignupRoute: typeof SignupRoute
   ApiHealthRoute: typeof ApiHealthRoute
+  PSlugRoute: typeof PSlugRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
@@ -423,6 +436,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/p/$slug': {
+      id: '/p/$slug'
+      path: '/p/$slug'
+      fullPath: '/p/$slug'
+      preLoaderRoute: typeof PSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/health': {
@@ -718,6 +738,7 @@ const rootRouteChildren: RootRouteChildren = {
   SigninRoute: SigninRoute,
   SignupRoute: SignupRoute,
   ApiHealthRoute: ApiHealthRoute,
+  PSlugRoute: PSlugRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport

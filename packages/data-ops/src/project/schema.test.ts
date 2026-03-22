@@ -1,4 +1,23 @@
-import { ProjectCreateRequestSchema, SlugParamSchema } from "./schema";
+import { MessageCreateRequestSchema, ProjectCreateRequestSchema, SlugParamSchema } from "./schema";
+
+describe("MessageCreateRequestSchema", () => {
+	it("accepts valid content", () => {
+		const result = MessageCreateRequestSchema.safeParse({
+			content: "Hello, I need help with my project",
+		});
+		expect(result.success).toBe(true);
+	});
+
+	it("rejects empty content", () => {
+		const result = MessageCreateRequestSchema.safeParse({ content: "" });
+		expect(result.success).toBe(false);
+	});
+
+	it("rejects missing content", () => {
+		const result = MessageCreateRequestSchema.safeParse({});
+		expect(result.success).toBe(false);
+	});
+});
 
 describe("ProjectCreateRequestSchema", () => {
 	it("accepts valid name", () => {

@@ -17,6 +17,7 @@
 		"wrangler": "^4.73.0"
 	},
 	"dependencies": {
+		"@anthropic-ai/sdk": "^0.80.0",
 		"@hono/zod-validator": "^0.7.6",
 		"@repo/data-ops": "workspace:*",
 		"hono": "^4.12.8"

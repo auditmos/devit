@@ -6,4 +6,6 @@ interface ExampleQueueMessage {
 	messageData;
 }
 
-interface Env extends Cloudflare.Env {}
+interface Env extends Cloudflare.Env {
+	ANTHROPIC_API_KEY: string;
+}

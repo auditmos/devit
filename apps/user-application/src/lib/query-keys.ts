@@ -1,10 +1,25 @@
 import type { Client, ClientListResponse } from "@repo/data-ops/client";
+import type { Message } from "@repo/data-ops/project";
 import { queryOptions } from "@tanstack/react-query";
+import { getChatMessages } from "@/core/functions/chat/binding";
 import { getClientBinding, getClientsBinding } from "@/core/functions/clients/binding";
 import { getClientDirect, getClientsDirect } from "@/core/functions/clients/direct";
 import { fetchClient, fetchClients } from "./api-client";
 
 type PaginationParams = { limit: number; offset: number };
+
+export const chatKeys = {
+	all: ["chat"] as const,
+	messages: (slug: string) => [...chatKeys.all, "messages", slug] as const,
+};
+
+export const chatQueries = {
+	messages: (slug: string) =>
+		queryOptions<Message[]>({
+			queryKey: chatKeys.messages(slug),
+			queryFn: () => getChatMessages({ data: { slug } }),
+		}),
+};
 
 interface EntityKeys {
 	detail: (id: string) => readonly unknown[];

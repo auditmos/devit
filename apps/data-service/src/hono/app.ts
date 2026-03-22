@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import chat from "./handlers/chat-handlers";
 import clients from "./handlers/client-handlers";
 import health from "./handlers/health-handlers";
 import projects from "./handlers/project-handlers";
@@ -15,3 +16,4 @@ App.use("*", createCorsMiddleware());
 App.route("/health", health);
 App.route("/clients", clients);
 App.route("/projects", projects);
+App.route("/chat", chat);
