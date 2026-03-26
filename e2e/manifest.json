@@ -1,0 +1,68 @@
+{
+	"issue": 3,
+	"title": "Client Chat Interface & AI Integration",
+	"baseUrl": "http://localhost:3000",
+	"preparedAt": "2026-03-26T11:30:00Z",
+	"branch": "main",
+	"commit": "2eb2416",
+	"criteria": [
+		{
+			"id": "AC-1",
+			"description": "Client opens project link and sees a chat interface with no login",
+			"script": "3-chat-loads-no-login.sh",
+			"type": "happy-path",
+			"status": "ready"
+		},
+		{
+			"id": "AC-2",
+			"description": "Client sends a message and receives an AI response",
+			"script": "3-send-receive-message.sh",
+			"type": "happy-path",
+			"status": "ready"
+		},
+		{
+			"id": "AC-3",
+			"description": "AI response follows the discovery interview structure",
+			"script": "3-ai-interview-structure.sh",
+			"type": "happy-path",
+			"status": "ready"
+		},
+		{
+			"id": "AC-4",
+			"description": "All messages (user + assistant) persist to the database",
+			"script": "3-messages-persist.sh",
+			"type": "happy-path",
+			"status": "ready"
+		},
+		{
+			"id": "AC-5",
+			"description": "Closing and reopening the link loads full conversation history",
+			"script": "3-conversation-resumes.sh",
+			"type": "happy-path",
+			"status": "ready"
+		},
+		{
+			"id": "AC-6",
+			"description": "AI resumes the interview from where it left off",
+			"script": "3-conversation-resumes.sh",
+			"type": "happy-path",
+			"status": "ready"
+		},
+		{
+			"id": "AC-7",
+			"description": "Chat handles loading/streaming states gracefully",
+			"script": "3-loading-states.sh",
+			"type": "happy-path",
+			"status": "ready"
+		}
+	],
+	"dependencies": {
+		"3-chat-loads-no-login.sh": ["3-setup-project.sh"],
+		"3-send-receive-message.sh": ["3-setup-project.sh"],
+		"3-ai-interview-structure.sh": ["3-setup-project.sh", "3-send-receive-message.sh"],
+		"3-messages-persist.sh": ["3-setup-project.sh", "3-send-receive-message.sh"],
+		"3-conversation-resumes.sh": ["3-setup-project.sh", "3-send-receive-message.sh"],
+		"3-loading-states.sh": ["3-setup-project.sh"]
+	},
+	"incidentalFindings": []
+}
