@@ -7,12 +7,15 @@ import type {
 	Project,
 	ProjectCreateInput,
 	ProjectListResponse,
+	Spec,
+	SystemPrompt,
+	Task,
 } from "./schema";
 import { generateSlug } from "./slug";
-import { messages, projects } from "./table";
+import { messages, projects, specs, systemPrompts, tasks } from "./table";
 
 export async function createMessage(
-	data: MessageCreateInput & { projectId: string; role: Message["role"] },
+	data: MessageCreateInput & { projectId: string; role: Message["role"]; phase?: string },
 ): Promise<Message> {
 	const db = getDb();
 	const [message] = await db
@@ -21,6 +24,7 @@ export async function createMessage(
 			projectId: data.projectId,
 			role: data.role,
 			content: data.content,
+			phase: data.phase ?? null,
 		})
 		.returning();
 	if (!message) {
@@ -82,4 +86,83 @@ export async function getProjects(params: PaginationRequest): Promise<ProjectLis
 			hasMore: params.offset + data.length < total,
 		},
 	};
+}
+
+export async function updateProjectStatus(
+	projectId: string,
+	status: Project["status"],
+): Promise<Project | null> {
+	const db = getDb();
+	const [updated] = await db
+		.update(projects)
+		.set({ status })
+		.where(eq(projects.id, projectId))
+		.returning();
+	return updated ?? null;
+}
+
+export async function createSpec(data: {
+	projectId: string;
+	contentMarkdown: string;
+}): Promise<Spec> {
+	const db = getDb();
+	const [spec] = await db
+		.insert(specs)
+		.values({
+			projectId: data.projectId,
+			contentMarkdown: data.contentMarkdown,
+		})
+		.returning();
+	if (!spec) {
+		throw new Error("Failed to create spec");
+	}
+	return spec;
+}
+
+interface TaskInput {
+	title: string;
+	description: string | null;
+	sortOrder: number;
+}
+
+export async function createTasks(projectId: string, taskInputs: TaskInput[]): Promise<Task[]> {
+	if (taskInputs.length === 0) return [];
+	const db = getDb();
+	return db
+		.insert(tasks)
+		.values(
+			taskInputs.map((t) => ({
+				projectId,
+				title: t.title,
+				description: t.description,
+				sortOrder: t.sortOrder,
+			})),
+		)
+		.returning();
+}
+
+export async function upsertSystemPrompt(phase: string, content: string): Promise<SystemPrompt> {
+	const db = getDb();
+	const [result] = await db
+		.insert(systemPrompts)
+		.values({ phase, content })
+		.onConflictDoUpdate({
+			target: systemPrompts.phase,
+			set: { content, updatedAt: new Date() },
+		})
+		.returning();
+	if (!result) {
+		throw new Error("Failed to upsert system prompt");
+	}
+	return result;
+}
+
+export async function getSystemPrompts(): Promise<Record<string, string>> {
+	const db = getDb();
+	const rows = await db.select().from(systemPrompts);
+	const map: Record<string, string> = {};
+	for (const row of rows) {
+		map[row.phase] = row.content;
+	}
+	return map;
 }

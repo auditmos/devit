@@ -1,23 +1,23 @@
 import Anthropic from "@anthropic-ai/sdk";
 import {
 	createMessage as createMessageQuery,
+	createSpec,
+	createTasks,
 	getMessagesByProjectId,
 	getProjectBySlug as getProjectBySlugQuery,
 	type Message,
 	type MessageCreateInput,
+	updateProjectStatus,
 } from "@repo/data-ops/project";
 import type { Result } from "../types/result";
-
-const DISCOVERY_SYSTEM_PROMPT = `You are an expert discovery interviewer for a software development agency. Your job is to understand the client's project requirements through a structured conversation.
-
-Guide the conversation through these areas:
-1. Project overview - What are they building and why?
-2. Target users - Who will use this and what problems does it solve?
-3. Core features - What are the must-have capabilities?
-4. Technical constraints - Any existing systems, platforms, or tech requirements?
-5. Timeline and budget - What are the expectations?
-
-Be conversational, ask one question at a time, and dig deeper when answers are vague. Summarize what you've learned periodically to confirm understanding.`;
+import {
+	buildSummarizedHistory,
+	detectPhaseTransition,
+	extractSpec,
+	extractTasks,
+	getCurrentPhase,
+	getSystemPrompt,
+} from "./phase-service";
 
 interface SendMessageResult {
 	userMessage: Message;
@@ -48,6 +48,13 @@ export function buildClaudeMessages(
 	return params;
 }
 
+const PHASE_MAX_TOKENS: Record<string, number> = {
+	discovery: 1024,
+	requirements: 4096,
+	plan: 4096,
+	tasks: 8192,
+};
+
 export async function sendMessage(
 	slug: string,
 	data: MessageCreateInput,
@@ -61,23 +68,27 @@ export async function sendMessage(
 		};
 	}
 
-	const history = await getMessagesByProjectId(project.id);
+	const fullHistory = await getMessagesByProjectId(project.id);
+	const currentPhase = getCurrentPhase(fullHistory);
+	const systemPrompt = getSystemPrompt(currentPhase);
 
 	const userMessage = await createMessageQuery({
 		projectId: project.id,
 		role: "user",
 		content: data.content,
+		phase: currentPhase,
 	});
 
-	const claudeMessages = buildClaudeMessages(history, data.content);
+	const history = buildSummarizedHistory(fullHistory);
+	const claudeMessages = buildClaudeMessages(history as Message[], data.content);
 
 	const client = new Anthropic({ apiKey });
 	let assistantContent: string;
 	try {
 		const response = await client.messages.create({
 			model: "claude-sonnet-4-20250514",
-			max_tokens: 1024,
-			system: DISCOVERY_SYSTEM_PROMPT,
+			max_tokens: PHASE_MAX_TOKENS[currentPhase] ?? 1024,
+			system: systemPrompt,
 			messages: claudeMessages,
 		});
 		const textBlock = response.content.find((b) => b.type === "text");
@@ -89,11 +100,29 @@ export async function sendMessage(
 		};
 	}
 
+	const transition = detectPhaseTransition(assistantContent);
+	const assistantPhase = transition?.phase ?? currentPhase;
+
 	const assistantMessage = await createMessageQuery({
 		projectId: project.id,
 		role: "assistant",
 		content: assistantContent,
+		phase: assistantPhase,
 	});
+
+	if (assistantPhase === "tasks" && currentPhase !== "tasks") {
+		const specContent = extractSpec(assistantContent);
+		if (specContent) {
+			await createSpec({ projectId: project.id, contentMarkdown: specContent });
+		}
+
+		const parsedTasks = extractTasks(assistantContent);
+		if (parsedTasks.length > 0) {
+			await createTasks(project.id, parsedTasks);
+		}
+
+		await updateProjectStatus(project.id, "review");
+	}
 
 	return { ok: true, data: { userMessage, assistantMessage } };
 }

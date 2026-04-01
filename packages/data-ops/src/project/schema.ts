@@ -33,6 +33,15 @@ export const SpecSchema = z.object({
 	createdAt: z.coerce.date(),
 });
 
+export const CONVERSATION_PHASE = ["discovery", "requirements", "plan", "tasks"] as const;
+
+export const SystemPromptSchema = z.object({
+	id: z.string().uuid(),
+	phase: z.string(),
+	content: z.string(),
+	updatedAt: z.coerce.date(),
+});
+
 export const TaskSchema = z.object({
 	id: z.string().uuid(),
 	projectId: z.string().uuid(),
@@ -89,6 +98,7 @@ export const MessageListResponseSchema = z.object({
 export type Project = z.infer<typeof ProjectSchema>;
 export type Message = z.infer<typeof MessageSchema>;
 export type Spec = z.infer<typeof SpecSchema>;
+export type SystemPrompt = z.infer<typeof SystemPromptSchema>;
 export type Task = z.infer<typeof TaskSchema>;
 export type ProjectCreateInput = z.infer<typeof ProjectCreateRequestSchema>;
 export type MessageCreateInput = z.infer<typeof MessageCreateRequestSchema>;

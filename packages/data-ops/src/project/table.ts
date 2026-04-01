@@ -32,6 +32,13 @@ export const specs = pgTable("specs", {
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const systemPrompts = pgTable("system_prompts", {
+	id: uuid("id").defaultRandom().primaryKey(),
+	phase: text("phase").notNull().unique(),
+	content: text("content").notNull(),
+	updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 export const tasks = pgTable("tasks", {
 	id: uuid("id").defaultRandom().primaryKey(),
 	projectId: uuid("project_id")
