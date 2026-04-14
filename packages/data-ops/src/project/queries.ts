@@ -1,4 +1,4 @@
-import { asc, count, eq } from "drizzle-orm";
+import { asc, count, eq, sql } from "drizzle-orm";
 import type { PaginationRequest } from "@/client/schema";
 import { getDb } from "@/database/setup";
 import type {
@@ -101,6 +101,28 @@ export async function updateProjectStatus(
 	return updated ?? null;
 }
 
+export async function getSpecByProjectId(projectId: string): Promise<Spec | null> {
+	const db = getDb();
+	const result = await db.select().from(specs).where(eq(specs.projectId, projectId));
+	return result[0] ?? null;
+}
+
+export async function updateSpec(specId: string, contentMarkdown: string): Promise<Spec> {
+	const db = getDb();
+	const [updated] = await db
+		.update(specs)
+		.set({
+			contentMarkdown,
+			version: sql`${specs.version} + 1`,
+		})
+		.where(eq(specs.id, specId))
+		.returning();
+	if (!updated) {
+		throw new Error("Spec not found");
+	}
+	return updated;
+}
+
 export async function createSpec(data: {
 	projectId: string;
 	contentMarkdown: string;
@@ -117,6 +139,61 @@ export async function createSpec(data: {
 		throw new Error("Failed to create spec");
 	}
 	return spec;
+}
+
+export async function updateTask(
+	taskId: string,
+	data: Partial<Pick<Task, "title" | "description" | "status">>,
+): Promise<Task | null> {
+	const db = getDb();
+	const [updated] = await db.update(tasks).set(data).where(eq(tasks.id, taskId)).returning();
+	return updated ?? null;
+}
+
+export async function deleteTask(taskId: string): Promise<boolean> {
+	const db = getDb();
+	const result = await db.delete(tasks).where(eq(tasks.id, taskId)).returning();
+	return result.length > 0;
+}
+
+export async function createTask(data: {
+	projectId: string;
+	title: string;
+	description?: string | null;
+	sortOrder: number;
+}): Promise<Task> {
+	const db = getDb();
+	const [task] = await db
+		.insert(tasks)
+		.values({
+			projectId: data.projectId,
+			title: data.title,
+			description: data.description ?? null,
+			sortOrder: data.sortOrder,
+		})
+		.returning();
+	if (!task) {
+		throw new Error("Failed to create task");
+	}
+	return task;
+}
+
+export async function reorderTasks(_projectId: string, orderedTaskIds: string[]): Promise<void> {
+	const db = getDb();
+	await Promise.all(
+		orderedTaskIds.map((taskId, index) =>
+			db.update(tasks).set({ sortOrder: index }).where(eq(tasks.id, taskId)),
+		),
+	);
+}
+
+export async function getTasksByProjectId(projectId: string): Promise<Task[]> {
+	const db = getDb();
+	return db
+		.select()
+		.from(tasks)
+		.where(eq(tasks.projectId, projectId))
+		.orderBy(asc(tasks.sortOrder));
 }
 
 interface TaskInput {

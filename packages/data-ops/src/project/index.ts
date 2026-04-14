@@ -2,13 +2,20 @@ export {
 	createMessage,
 	createProject,
 	createSpec,
+	createTask,
 	createTasks,
 	deleteProject,
+	deleteTask,
 	getMessagesByProjectId,
 	getProjectBySlug,
 	getProjects,
+	getSpecByProjectId,
 	getSystemPrompts,
+	getTasksByProjectId,
+	reorderTasks,
 	updateProjectStatus,
+	updateSpec,
+	updateTask,
 	upsertSystemPrompt,
 } from "./queries";
 export type {
@@ -19,8 +26,12 @@ export type {
 	ProjectCreateInput,
 	ProjectListResponse,
 	Spec,
+	SpecUpdateInput,
 	SystemPrompt,
 	Task,
+	TaskCreateInput,
+	TaskReorderInput,
+	TaskUpdateInput,
 } from "./schema";
 export {
 	CONVERSATION_PHASE,
@@ -34,8 +45,13 @@ export {
 	ProjectSchema,
 	SlugParamSchema,
 	SpecSchema,
+	SpecUpdateRequestSchema,
 	SystemPromptSchema,
+	TaskCreateRequestSchema,
+	TaskIdParamSchema,
+	TaskReorderRequestSchema,
 	TaskSchema,
+	TaskUpdateRequestSchema,
 } from "./schema";
 export { generateSlug } from "./slug";
 export { messages, projects, specs, systemPrompts, tasks } from "./table";

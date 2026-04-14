@@ -91,6 +91,34 @@ export const MessageListResponseSchema = z.object({
 	data: z.array(MessageSchema),
 });
 
+export const SpecUpdateRequestSchema = z.object({
+	contentMarkdown: z.string().min(1, "Content is required"),
+});
+
+export const TaskCreateRequestSchema = z.object({
+	title: z.string().min(1, "Title is required").max(200, "Title must be at most 200 characters"),
+	description: z.string().nullable().optional(),
+	sortOrder: z.number().int().min(0).optional(),
+});
+
+export const TaskUpdateRequestSchema = z.object({
+	title: z.string().min(1).max(200).optional(),
+	description: z.string().nullable().optional(),
+	status: z.string().optional(),
+});
+
+export const TaskIdParamSchema = z.object({
+	slug: z
+		.string()
+		.min(1)
+		.regex(/^[a-z0-9-]+$/),
+	taskId: z.string().uuid(),
+});
+
+export const TaskReorderRequestSchema = z.object({
+	taskIds: z.array(z.string().uuid()).min(1, "At least one task ID is required"),
+});
+
 // ============================================
 // Types
 // ============================================
@@ -104,3 +132,7 @@ export type ProjectCreateInput = z.infer<typeof ProjectCreateRequestSchema>;
 export type MessageCreateInput = z.infer<typeof MessageCreateRequestSchema>;
 export type ProjectListResponse = z.infer<typeof ProjectListResponseSchema>;
 export type MessageListResponse = z.infer<typeof MessageListResponseSchema>;
+export type SpecUpdateInput = z.infer<typeof SpecUpdateRequestSchema>;
+export type TaskCreateInput = z.infer<typeof TaskCreateRequestSchema>;
+export type TaskUpdateInput = z.infer<typeof TaskUpdateRequestSchema>;
+export type TaskReorderInput = z.infer<typeof TaskReorderRequestSchema>;

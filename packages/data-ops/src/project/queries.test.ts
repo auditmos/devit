@@ -4,12 +4,19 @@ import {
 	createMessage,
 	createProject,
 	createSpec,
+	createTask,
 	createTasks,
+	deleteTask,
 	getMessagesByProjectId,
 	getProjectBySlug,
 	getProjects,
+	getSpecByProjectId,
 	getSystemPrompts,
+	getTasksByProjectId,
+	reorderTasks,
 	updateProjectStatus,
+	updateSpec,
+	updateTask,
 	upsertSystemPrompt,
 } from "./queries";
 import { projects, systemPrompts } from "./table";
@@ -280,5 +287,234 @@ describe("getSystemPrompts", () => {
 		expect(typeof prompts).toBe("object");
 
 		// Note: other tests may have inserted prompts, so we just verify the shape
+	});
+});
+
+describe("getSpecByProjectId", () => {
+	it("returns the spec for a project that has one", async () => {
+		const project = await createProject({ name: "__test_project__" });
+		const created = await createSpec({
+			projectId: project.id,
+			contentMarkdown: "# Test Spec\n\nSome content.",
+		});
+
+		const found = await getSpecByProjectId(project.id);
+		expect(found).not.toBeNull();
+		expect(found?.id).toBe(created.id);
+		expect(found?.contentMarkdown).toBe("# Test Spec\n\nSome content.");
+		expect(found?.version).toBe(1);
+
+		// cleanup via cascade
+		const db = getDb();
+		await db.delete(projects).where(eq(projects.id, project.id));
+	});
+
+	it("returns null when project has no spec", async () => {
+		const project = await createProject({ name: "__test_project__" });
+
+		const found = await getSpecByProjectId(project.id);
+		expect(found).toBeNull();
+
+		// cleanup
+		const db = getDb();
+		await db.delete(projects).where(eq(projects.id, project.id));
+	});
+});
+
+describe("updateSpec", () => {
+	it("updates content and increments version", async () => {
+		const project = await createProject({ name: "__test_project__" });
+		const spec = await createSpec({
+			projectId: project.id,
+			contentMarkdown: "# Original",
+		});
+		expect(spec.version).toBe(1);
+
+		const updated = await updateSpec(spec.id, "# Updated content");
+		expect(updated.id).toBe(spec.id);
+		expect(updated.contentMarkdown).toBe("# Updated content");
+		expect(updated.version).toBe(2);
+
+		// update again to confirm increment
+		const updated2 = await updateSpec(spec.id, "# Third version");
+		expect(updated2.version).toBe(3);
+
+		// cleanup via cascade
+		const db = getDb();
+		await db.delete(projects).where(eq(projects.id, project.id));
+	});
+
+	it("throws when spec does not exist", async () => {
+		await expect(updateSpec("00000000-0000-0000-0000-000000000000", "content")).rejects.toThrow(
+			"Spec not found",
+		);
+	});
+});
+
+describe("getTasksByProjectId", () => {
+	it("returns tasks sorted by sortOrder", async () => {
+		const project = await createProject({ name: "__test_project__" });
+		await createTasks(project.id, [
+			{ title: "Third", description: null, sortOrder: 2 },
+			{ title: "First", description: "desc", sortOrder: 0 },
+			{ title: "Second", description: null, sortOrder: 1 },
+		]);
+
+		const result = await getTasksByProjectId(project.id);
+		expect(result).toHaveLength(3);
+		expect(result[0]?.title).toBe("First");
+		expect(result[1]?.title).toBe("Second");
+		expect(result[2]?.title).toBe("Third");
+
+		// cleanup via cascade
+		const db = getDb();
+		await db.delete(projects).where(eq(projects.id, project.id));
+	});
+
+	it("returns empty array when project has no tasks", async () => {
+		const project = await createProject({ name: "__test_project__" });
+
+		const result = await getTasksByProjectId(project.id);
+		expect(result).toEqual([]);
+
+		// cleanup
+		const db = getDb();
+		await db.delete(projects).where(eq(projects.id, project.id));
+	});
+});
+
+describe("updateTask", () => {
+	it("updates task title and returns updated task", async () => {
+		const project = await createProject({ name: "__test_project__" });
+		const result = await createTasks(project.id, [
+			{ title: "Original title", description: "desc", sortOrder: 0 },
+		]);
+		const task = result[0];
+		if (!task) throw new Error("Task not created");
+
+		const updated = await updateTask(task.id, { title: "New title" });
+		expect(updated).not.toBeNull();
+		expect(updated?.title).toBe("New title");
+		expect(updated?.description).toBe("desc");
+
+		// cleanup via cascade
+		const db = getDb();
+		await db.delete(projects).where(eq(projects.id, project.id));
+	});
+
+	it("updates task status", async () => {
+		const project = await createProject({ name: "__test_project__" });
+		const result = await createTasks(project.id, [
+			{ title: "Task", description: null, sortOrder: 0 },
+		]);
+		const task = result[0];
+		if (!task) throw new Error("Task not created");
+
+		const updated = await updateTask(task.id, { status: "done" });
+		expect(updated?.status).toBe("done");
+
+		// cleanup via cascade
+		const db = getDb();
+		await db.delete(projects).where(eq(projects.id, project.id));
+	});
+
+	it("returns null for non-existent task", async () => {
+		const result = await updateTask("00000000-0000-0000-0000-000000000000", { title: "x" });
+		expect(result).toBeNull();
+	});
+});
+
+describe("deleteTask", () => {
+	it("deletes an existing task and returns true", async () => {
+		const project = await createProject({ name: "__test_project__" });
+		const result = await createTasks(project.id, [
+			{ title: "To delete", description: null, sortOrder: 0 },
+		]);
+		const task = result[0];
+		if (!task) throw new Error("Task not created");
+
+		const deleted = await deleteTask(task.id);
+		expect(deleted).toBe(true);
+
+		const remaining = await getTasksByProjectId(project.id);
+		expect(remaining).toHaveLength(0);
+
+		// cleanup
+		const db = getDb();
+		await db.delete(projects).where(eq(projects.id, project.id));
+	});
+
+	it("returns false for non-existent task", async () => {
+		const result = await deleteTask("00000000-0000-0000-0000-000000000000");
+		expect(result).toBe(false);
+	});
+});
+
+describe("createTask", () => {
+	it("creates a single task with correct fields", async () => {
+		const project = await createProject({ name: "__test_project__" });
+
+		const task = await createTask({
+			projectId: project.id,
+			title: "New task",
+			description: "Some description",
+			sortOrder: 5,
+		});
+
+		expect(task.id).toBeDefined();
+		expect(task.title).toBe("New task");
+		expect(task.description).toBe("Some description");
+		expect(task.sortOrder).toBe(5);
+		expect(task.status).toBe("pending");
+
+		// cleanup via cascade
+		const db = getDb();
+		await db.delete(projects).where(eq(projects.id, project.id));
+	});
+
+	it("defaults description to null when not provided", async () => {
+		const project = await createProject({ name: "__test_project__" });
+
+		const task = await createTask({
+			projectId: project.id,
+			title: "No desc",
+			sortOrder: 0,
+		});
+
+		expect(task.description).toBeNull();
+
+		// cleanup via cascade
+		const db = getDb();
+		await db.delete(projects).where(eq(projects.id, project.id));
+	});
+});
+
+describe("reorderTasks", () => {
+	it("updates sortOrder based on array position", async () => {
+		const project = await createProject({ name: "__test_project__" });
+		const created = await createTasks(project.id, [
+			{ title: "A", description: null, sortOrder: 0 },
+			{ title: "B", description: null, sortOrder: 1 },
+			{ title: "C", description: null, sortOrder: 2 },
+		]);
+
+		const taskA = created.find((t) => t.title === "A")!;
+		const taskB = created.find((t) => t.title === "B")!;
+		const taskC = created.find((t) => t.title === "C")!;
+
+		// Reorder: C, A, B
+		await reorderTasks(project.id, [taskC.id, taskA.id, taskB.id]);
+
+		const reordered = await getTasksByProjectId(project.id);
+		expect(reordered[0]?.title).toBe("C");
+		expect(reordered[0]?.sortOrder).toBe(0);
+		expect(reordered[1]?.title).toBe("A");
+		expect(reordered[1]?.sortOrder).toBe(1);
+		expect(reordered[2]?.title).toBe("B");
+		expect(reordered[2]?.sortOrder).toBe(2);
+
+		// cleanup via cascade
+		const db = getDb();
+		await db.delete(projects).where(eq(projects.id, project.id));
 	});
 });
