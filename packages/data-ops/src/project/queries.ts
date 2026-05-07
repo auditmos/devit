@@ -101,6 +101,19 @@ export async function updateProjectStatus(
 	return updated ?? null;
 }
 
+export async function updateProjectGithubRepo(
+	projectId: string,
+	githubRepo: string | null,
+): Promise<Project | null> {
+	const db = getDb();
+	const [updated] = await db
+		.update(projects)
+		.set({ githubRepo })
+		.where(eq(projects.id, projectId))
+		.returning();
+	return updated ?? null;
+}
+
 export async function getSpecByProjectId(projectId: string): Promise<Spec | null> {
 	const db = getDb();
 	const result = await db.select().from(specs).where(eq(specs.projectId, projectId));
@@ -147,6 +160,25 @@ export async function updateTask(
 ): Promise<Task | null> {
 	const db = getDb();
 	const [updated] = await db.update(tasks).set(data).where(eq(tasks.id, taskId)).returning();
+	return updated ?? null;
+}
+
+export async function updateTaskGithubIssue(
+	taskId: string,
+	data: { number: number; url: string },
+): Promise<Task | null> {
+	const db = getDb();
+	const [updated] = await db
+		.update(tasks)
+		.set({ githubIssueNumber: data.number, githubIssueUrl: data.url })
+		.where(eq(tasks.id, taskId))
+		.returning();
+	return updated ?? null;
+}
+
+export async function updateTaskStatus(taskId: string, status: string): Promise<Task | null> {
+	const db = getDb();
+	const [updated] = await db.update(tasks).set({ status }).where(eq(tasks.id, taskId)).returning();
 	return updated ?? null;
 }
 

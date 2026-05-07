@@ -15,6 +15,7 @@ import { App } from "../app";
 const TEST_ENV = {
 	API_TOKEN: "test-token",
 	ANTHROPIC_API_KEY: "test-anthropic-key",
+	GITHUB_TOKEN: "ghp_test_token",
 	DATABASE_HOST: process.env.DATABASE_HOST!,
 	DATABASE_USERNAME: process.env.DATABASE_USERNAME!,
 	DATABASE_PASSWORD: process.env.DATABASE_PASSWORD!,
@@ -431,5 +432,58 @@ describe("POST /projects/:slug/approve", () => {
 			TEST_ENV,
 		);
 		expect(res.status).toBe(401);
+	});
+});
+
+// ============================================
+// PUT /projects/:slug/github-repo
+// ============================================
+
+describe("PUT /projects/:slug/github-repo", () => {
+	it("sets githubRepo on the project and returns updated project", async () => {
+		const project = await setupProject();
+
+		const res = await App.request(
+			`/projects/${project.slug}/github-repo`,
+			{
+				method: "PUT",
+				headers: authHeaders(),
+				body: JSON.stringify({ githubRepo: "octocat/hello" }),
+			},
+			TEST_ENV,
+		);
+		expect(res.status).toBe(200);
+
+		const body = (await res.json()) as Project;
+		expect(body.githubRepo).toBe("octocat/hello");
+		expect(body.slug).toBe(project.slug);
+	});
+
+	it("returns 401 without auth token", async () => {
+		const project = await setupProject();
+
+		const res = await App.request(
+			`/projects/${project.slug}/github-repo`,
+			{
+				method: "PUT",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ githubRepo: "octocat/hello" }),
+			},
+			TEST_ENV,
+		);
+		expect(res.status).toBe(401);
+	});
+
+	it("returns 404 for unknown slug", async () => {
+		const res = await App.request(
+			"/projects/nonexistent-slug/github-repo",
+			{
+				method: "PUT",
+				headers: authHeaders(),
+				body: JSON.stringify({ githubRepo: "octocat/hello" }),
+			},
+			TEST_ENV,
+		);
+		expect(res.status).toBe(404);
 	});
 });

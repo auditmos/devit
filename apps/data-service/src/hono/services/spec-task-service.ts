@@ -5,16 +5,34 @@ import {
 	getProjectBySlug as getProjectBySlugQuery,
 	getSpecByProjectId,
 	getTasksByProjectId,
+	type Project,
 	reorderTasks as reorderTasksQuery,
 	type Spec,
 	type Task,
 	type TaskCreateInput,
 	type TaskUpdateInput,
+	updateProjectGithubRepo as updateProjectGithubRepoQuery,
 	updateProjectStatus,
 	updateSpec as updateSpecQuery,
 	updateTask as updateTaskQuery,
 } from "@repo/data-ops/project";
 import type { Result } from "../types/result";
+
+export async function setProjectRepo(
+	slug: string,
+	githubRepo: string | null,
+): Promise<Result<Project>> {
+	const projectResult = await resolveProject(slug);
+	if (!projectResult.ok) return projectResult;
+
+	const updated = await updateProjectGithubRepoQuery(projectResult.data.id, githubRepo);
+	if (!updated)
+		return {
+			ok: false,
+			error: { code: "NOT_FOUND", message: "Project not found", status: 404 },
+		};
+	return { ok: true, data: updated };
+}
 
 export async function getClientView(slug: string): Promise<Result<ClientViewResponse>> {
 	const projectResult = await resolveProject(slug);

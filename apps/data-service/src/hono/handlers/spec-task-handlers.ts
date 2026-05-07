@@ -1,5 +1,6 @@
 import { zValidator } from "@hono/zod-validator";
 import {
+	ProjectRepoUpdateRequestSchema,
 	SlugParamSchema,
 	SpecUpdateRequestSchema,
 	TaskCreateRequestSchema,
@@ -13,6 +14,19 @@ import * as specTaskService from "../services/spec-task-service";
 import { resultToResponse } from "../utils/response";
 
 const specTasks = new Hono<{ Bindings: Env }>();
+
+// PUT /projects/:slug/github-repo
+specTasks.put(
+	"/:slug/github-repo",
+	(c, next) => authMiddleware(c.env.API_TOKEN)(c, next),
+	zValidator("param", SlugParamSchema),
+	zValidator("json", ProjectRepoUpdateRequestSchema),
+	async (c) => {
+		const { slug } = c.req.valid("param");
+		const { githubRepo } = c.req.valid("json");
+		return resultToResponse(c, await specTaskService.setProjectRepo(slug, githubRepo));
+	},
+);
 
 // GET /projects/:slug/client-view (public — no auth)
 specTasks.get("/:slug/client-view", zValidator("param", SlugParamSchema), async (c) => {

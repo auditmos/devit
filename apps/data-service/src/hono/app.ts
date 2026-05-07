@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import chat from "./handlers/chat-handlers";
 import clients from "./handlers/client-handlers";
+import github from "./handlers/github-handlers";
 import health from "./handlers/health-handlers";
 import projects from "./handlers/project-handlers";
 import specTasks from "./handlers/spec-task-handlers";
@@ -19,3 +20,4 @@ App.route("/clients", clients);
 App.route("/projects", projects);
 App.route("/projects", specTasks);
 App.route("/chat", chat);
+App.route("/github", github);

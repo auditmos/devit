@@ -13,9 +13,12 @@ export {
 	getSystemPrompts,
 	getTasksByProjectId,
 	reorderTasks,
+	updateProjectGithubRepo,
 	updateProjectStatus,
 	updateSpec,
 	updateTask,
+	updateTaskGithubIssue,
+	updateTaskStatus,
 	upsertSystemPrompt,
 } from "./queries";
 export type {
@@ -26,6 +29,7 @@ export type {
 	Project,
 	ProjectCreateInput,
 	ProjectListResponse,
+	ProjectRepoUpdateInput,
 	Spec,
 	SpecUpdateInput,
 	SystemPrompt,
@@ -44,6 +48,7 @@ export {
 	PROJECT_STATUS,
 	ProjectCreateRequestSchema,
 	ProjectListResponseSchema,
+	ProjectRepoUpdateRequestSchema,
 	ProjectSchema,
 	SlugParamSchema,
 	SpecSchema,

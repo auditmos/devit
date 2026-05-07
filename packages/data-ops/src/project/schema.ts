@@ -129,6 +129,13 @@ export const TaskReorderRequestSchema = z.object({
 	taskIds: z.array(z.string().uuid()).min(1, "At least one task ID is required"),
 });
 
+export const ProjectRepoUpdateRequestSchema = z.object({
+	githubRepo: z
+		.string()
+		.regex(/^[\w.-]+\/[\w.-]+$/, "Must be in 'owner/repo' format")
+		.nullable(),
+});
+
 // ============================================
 // Types
 // ============================================
@@ -146,4 +153,5 @@ export type SpecUpdateInput = z.infer<typeof SpecUpdateRequestSchema>;
 export type TaskCreateInput = z.infer<typeof TaskCreateRequestSchema>;
 export type TaskUpdateInput = z.infer<typeof TaskUpdateRequestSchema>;
 export type TaskReorderInput = z.infer<typeof TaskReorderRequestSchema>;
+export type ProjectRepoUpdateInput = z.infer<typeof ProjectRepoUpdateRequestSchema>;
 export type ClientViewResponse = z.infer<typeof ClientViewResponseSchema>;
