@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/auditmos/devit/compare/v1.3.0...v1.4.0) (2026-05-07)
+
+
+### Features
+
+* add GitHub sync API for issue [#8](https://github.com/auditmos/devit/issues/8) ([cfc6f49](https://github.com/auditmos/devit/commit/cfc6f493d2fc8e5f2f086cb736307fb32e91d979))
+
 # [1.3.0](https://github.com/auditmos/devit/compare/v1.2.0...v1.3.0) (2026-05-07)
 
 
