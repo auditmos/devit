@@ -1,5 +1,6 @@
 import { ErrorResponseSchema, type PaginationRequest } from "@repo/data-ops/client";
 import type {
+	ClientViewResponse,
 	MessageListResponse,
 	Project,
 	ProjectCreateInput,
@@ -67,4 +68,13 @@ export async function fetchProjectMessages(slug: string): Promise<MessageListRes
 	});
 
 	return handleResponse<MessageListResponse>(response);
+}
+
+export async function fetchClientView(slug: string): Promise<ClientViewResponse> {
+	const response = await fetch(`${API_URL}/projects/${slug}/client-view`, {
+		method: "GET",
+		headers: getHeaders(),
+	});
+
+	return handleResponse<ClientViewResponse>(response);
 }

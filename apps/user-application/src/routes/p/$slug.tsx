@@ -2,20 +2,32 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { ChatInput } from "@/components/chat/chat-input";
 import { ChatMessageList } from "@/components/chat/chat-message-list";
+import { SpecTrackingView } from "@/components/spec/spec-tracking-view";
 import { sendChatMessage } from "@/core/functions/chat/binding";
-import { chatKeys, chatQueries } from "@/lib/query-keys";
+import { chatKeys, chatQueries, projectQueries } from "@/lib/query-keys";
 
 export const Route = createFileRoute("/p/$slug")({
 	loader: async ({ context, params }) => {
-		await context.queryClient.ensureQueryData(chatQueries.messages(params.slug));
+		await context.queryClient.ensureQueryData(projectQueries.clientView(params.slug));
 	},
-	component: ChatPage,
+	component: ProjectPage,
 });
 
-function ChatPage() {
+function ProjectPage() {
 	const { slug } = Route.useParams();
-	const queryClient = useQueryClient();
+	const { data: view } = useQuery(projectQueries.clientView(slug));
 
+	if (!view) return null;
+
+	if (view.project.status === "active" || view.project.status === "complete") {
+		return <SpecTrackingView view={view} />;
+	}
+
+	return <ChatPage slug={slug} />;
+}
+
+function ChatPage({ slug }: { slug: string }) {
+	const queryClient = useQueryClient();
 	const { data: messages = [], isLoading } = useQuery(chatQueries.messages(slug));
 
 	const mutation = useMutation({

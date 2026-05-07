@@ -19,6 +19,7 @@ export {
 	upsertSystemPrompt,
 } from "./queries";
 export type {
+	ClientViewResponse,
 	Message,
 	MessageCreateInput,
 	MessageListResponse,
@@ -34,6 +35,7 @@ export type {
 	TaskUpdateInput,
 } from "./schema";
 export {
+	ClientViewResponseSchema,
 	CONVERSATION_PHASE,
 	MESSAGE_ROLE,
 	MessageCreateRequestSchema,

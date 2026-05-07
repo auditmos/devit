@@ -305,6 +305,87 @@ describe("PUT /projects/:slug/tasks/reorder", () => {
 });
 
 // ============================================
+// GET /projects/:slug/client-view
+// ============================================
+
+describe("GET /projects/:slug/client-view", () => {
+	it("returns project meta, spec, and tasks for active project", async () => {
+		const project = await setupProject("active");
+		const spec = await createSpec({
+			projectId: project.id,
+			contentMarkdown: "# Final Spec\n\nLooks good.",
+		});
+		const tasks = await createTasks(project.id, [
+			{ title: "Build feature A", description: "Detail A", sortOrder: 0 },
+			{ title: "Ship release", description: null, sortOrder: 1 },
+		]);
+
+		const res = await App.request(
+			`/projects/${project.slug}/client-view`,
+			{ method: "GET" },
+			TEST_ENV,
+		);
+		expect(res.status).toBe(200);
+
+		const body = (await res.json()) as {
+			project: { slug: string; name: string; status: Project["status"] };
+			spec: Spec | null;
+			tasks: Task[];
+		};
+		expect(body.project.slug).toBe(project.slug);
+		expect(body.project.status).toBe("active");
+		expect(body.spec?.id).toBe(spec.id);
+		expect(body.spec?.contentMarkdown).toBe("# Final Spec\n\nLooks good.");
+		expect(body.tasks).toHaveLength(2);
+		expect(body.tasks[0]?.title).toBe(tasks[0]?.title);
+	});
+
+	it("returns 404 for unknown slug", async () => {
+		const res = await App.request(
+			"/projects/nonexistent-client-slug/client-view",
+			{ method: "GET" },
+			TEST_ENV,
+		);
+		expect(res.status).toBe(404);
+	});
+
+	it("loads without Authorization header", async () => {
+		const project = await setupProject("active");
+		await createSpec({
+			projectId: project.id,
+			contentMarkdown: "# Spec",
+		});
+
+		const res = await App.request(
+			`/projects/${project.slug}/client-view`,
+			{ method: "GET", headers: {} },
+			TEST_ENV,
+		);
+		expect(res.status).toBe(200);
+	});
+
+	it("returns spec=null and tasks=[] for project still in interviewing", async () => {
+		const project = await setupProject();
+
+		const res = await App.request(
+			`/projects/${project.slug}/client-view`,
+			{ method: "GET" },
+			TEST_ENV,
+		);
+		expect(res.status).toBe(200);
+
+		const body = (await res.json()) as {
+			project: { status: Project["status"] };
+			spec: Spec | null;
+			tasks: Task[];
+		};
+		expect(body.project.status).toBe("interviewing");
+		expect(body.spec).toBeNull();
+		expect(body.tasks).toEqual([]);
+	});
+});
+
+// ============================================
 // POST /projects/:slug/approve
 // ============================================
 

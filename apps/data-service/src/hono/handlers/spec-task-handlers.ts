@@ -14,6 +14,12 @@ import { resultToResponse } from "../utils/response";
 
 const specTasks = new Hono<{ Bindings: Env }>();
 
+// GET /projects/:slug/client-view (public — no auth)
+specTasks.get("/:slug/client-view", zValidator("param", SlugParamSchema), async (c) => {
+	const { slug } = c.req.valid("param");
+	return resultToResponse(c, await specTaskService.getClientView(slug));
+});
+
 // GET /projects/:slug/spec
 specTasks.get("/:slug/spec", zValidator("param", SlugParamSchema), async (c) => {
 	const { slug } = c.req.valid("param");

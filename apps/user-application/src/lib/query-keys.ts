@@ -1,9 +1,10 @@
 import type { Client, ClientListResponse } from "@repo/data-ops/client";
-import type { Message } from "@repo/data-ops/project";
+import type { ClientViewResponse, Message } from "@repo/data-ops/project";
 import { queryOptions } from "@tanstack/react-query";
 import { getChatMessages } from "@/core/functions/chat/binding";
 import { getClientBinding, getClientsBinding } from "@/core/functions/clients/binding";
 import { getClientDirect, getClientsDirect } from "@/core/functions/clients/direct";
+import { getClientView } from "@/core/functions/projects/binding";
 import { fetchClient, fetchClients } from "./api-client";
 
 type PaginationParams = { limit: number; offset: number };
@@ -18,6 +19,19 @@ export const chatQueries = {
 		queryOptions<Message[]>({
 			queryKey: chatKeys.messages(slug),
 			queryFn: () => getChatMessages({ data: { slug } }),
+		}),
+};
+
+export const projectKeys = {
+	all: ["projects"] as const,
+	clientView: (slug: string) => [...projectKeys.all, "client-view", slug] as const,
+};
+
+export const projectQueries = {
+	clientView: (slug: string) =>
+		queryOptions<ClientViewResponse>({
+			queryKey: projectKeys.clientView(slug),
+			queryFn: () => getClientView({ data: { slug } }),
 		}),
 };
 

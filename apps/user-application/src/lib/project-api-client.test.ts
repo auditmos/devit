@@ -1,6 +1,7 @@
 import { AppError } from "@/core/errors";
 import {
 	createProjectApi,
+	fetchClientView,
 	fetchProject,
 	fetchProjectMessages,
 	fetchProjects,
@@ -8,6 +9,55 @@ import {
 
 const mockFetch = vi.fn();
 globalThis.fetch = mockFetch;
+
+describe("fetchClientView", () => {
+	it("fetches client view payload by slug", async () => {
+		const mockResponse = {
+			project: { slug: "test-abc", name: "Test", status: "active" },
+			spec: {
+				id: "s1",
+				projectId: "p1",
+				contentMarkdown: "# Spec",
+				version: 1,
+				createdAt: "2026-04-01T00:00:00Z",
+			},
+			tasks: [
+				{
+					id: "t1",
+					projectId: "p1",
+					title: "Task A",
+					description: null,
+					status: "pending",
+					githubIssueNumber: null,
+					githubIssueUrl: null,
+					sortOrder: 0,
+					createdAt: "2026-04-01T00:00:00Z",
+				},
+			],
+		};
+		mockFetch.mockResolvedValueOnce(new Response(JSON.stringify(mockResponse), { status: 200 }));
+
+		const result = await fetchClientView("test-abc");
+
+		expect(result.project.status).toBe("active");
+		expect(result.spec?.contentMarkdown).toBe("# Spec");
+		expect(result.tasks).toHaveLength(1);
+		expect(mockFetch).toHaveBeenCalledWith(
+			expect.stringContaining("/projects/test-abc/client-view"),
+			expect.objectContaining({ method: "GET" }),
+		);
+	});
+
+	it("throws AppError on 404", async () => {
+		mockFetch.mockResolvedValueOnce(
+			new Response(JSON.stringify({ message: "Project not found", code: "NOT_FOUND" }), {
+				status: 404,
+			}),
+		);
+
+		await expect(fetchClientView("nonexistent")).rejects.toThrow(AppError);
+	});
+});
 
 afterEach(() => {
 	mockFetch.mockReset();

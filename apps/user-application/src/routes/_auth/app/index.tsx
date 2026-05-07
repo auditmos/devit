@@ -113,11 +113,13 @@ function ProjectList() {
 	);
 }
 
+const PROJECT_SKELETON_KEYS = ["a", "b", "c"] as const;
+
 function ProjectListSkeleton() {
 	return (
 		<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-			{Array.from({ length: 3 }, (_, i) => (
-				<Card key={`skeleton-${i}`}>
+			{PROJECT_SKELETON_KEYS.map((key) => (
+				<Card key={key}>
 					<CardHeader>
 						<div className="h-5 w-32 animate-pulse rounded bg-muted" />
 					</CardHeader>

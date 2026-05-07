@@ -178,6 +178,8 @@ function MessageBubble({ message }: { message: Message }) {
 	);
 }
 
+const MESSAGE_SKELETON_KEYS = ["a", "b", "c"] as const;
+
 function ProjectDetailSkeleton() {
 	return (
 		<div className="space-y-4">
@@ -190,8 +192,8 @@ function ProjectDetailSkeleton() {
 			<Card>
 				<CardContent className="py-8">
 					<div className="space-y-4">
-						{Array.from({ length: 3 }, (_, i) => (
-							<div key={`msg-skeleton-${i}`} className="flex gap-3">
+						{MESSAGE_SKELETON_KEYS.map((key) => (
+							<div key={key} className="flex gap-3">
 								<div className="h-8 w-8 animate-pulse rounded-full bg-muted" />
 								<div className="flex-1 space-y-2">
 									<div className="h-3 w-20 animate-pulse rounded bg-muted" />

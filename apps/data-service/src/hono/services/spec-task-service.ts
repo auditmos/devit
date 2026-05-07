@@ -1,4 +1,5 @@
 import {
+	type ClientViewResponse,
 	createTask as createTaskQuery,
 	deleteTask as deleteTaskQuery,
 	getProjectBySlug as getProjectBySlugQuery,
@@ -14,6 +15,26 @@ import {
 	updateTask as updateTaskQuery,
 } from "@repo/data-ops/project";
 import type { Result } from "../types/result";
+
+export async function getClientView(slug: string): Promise<Result<ClientViewResponse>> {
+	const projectResult = await resolveProject(slug);
+	if (!projectResult.ok) return projectResult;
+
+	const project = projectResult.data;
+	const [spec, tasks] = await Promise.all([
+		getSpecByProjectId(project.id),
+		getTasksByProjectId(project.id),
+	]);
+
+	return {
+		ok: true,
+		data: {
+			project: { slug: project.slug, name: project.name, status: project.status },
+			spec: spec ?? null,
+			tasks,
+		},
+	};
+}
 
 async function resolveProject(slug: string) {
 	const project = await getProjectBySlugQuery(slug);

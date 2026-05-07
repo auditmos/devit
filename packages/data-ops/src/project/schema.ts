@@ -95,6 +95,16 @@ export const SpecUpdateRequestSchema = z.object({
 	contentMarkdown: z.string().min(1, "Content is required"),
 });
 
+export const ClientViewResponseSchema = z.object({
+	project: z.object({
+		slug: z.string(),
+		name: z.string(),
+		status: z.enum(PROJECT_STATUS),
+	}),
+	spec: SpecSchema.nullable(),
+	tasks: z.array(TaskSchema),
+});
+
 export const TaskCreateRequestSchema = z.object({
 	title: z.string().min(1, "Title is required").max(200, "Title must be at most 200 characters"),
 	description: z.string().nullable().optional(),
@@ -136,3 +146,4 @@ export type SpecUpdateInput = z.infer<typeof SpecUpdateRequestSchema>;
 export type TaskCreateInput = z.infer<typeof TaskCreateRequestSchema>;
 export type TaskUpdateInput = z.infer<typeof TaskUpdateRequestSchema>;
 export type TaskReorderInput = z.infer<typeof TaskReorderRequestSchema>;
+export type ClientViewResponse = z.infer<typeof ClientViewResponseSchema>;
