@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/auditmos/devit/compare/v1.5.0...v1.6.0) (2026-05-08)
+
+
+### Features
+
+* add GitHub sync frontend for issue [#11](https://github.com/auditmos/devit/issues/11) ([10ddaa3](https://github.com/auditmos/devit/commit/10ddaa328c23d741c573bf215a6850b2b9a8bf93))
+
 # [1.5.0](https://github.com/auditmos/devit/compare/v1.4.0...v1.5.0) (2026-05-08)
 
 
