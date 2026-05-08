@@ -18,11 +18,11 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { createProjectApi, fetchProjects } from "@/lib/project-api-client";
+import { createProject, getProjects } from "@/core/functions/projects/binding";
 
 const projectsQueryOptions = queryOptions({
 	queryKey: ["projects", { limit: 100, offset: 0 }],
-	queryFn: () => fetchProjects({ limit: 100, offset: 0 }),
+	queryFn: () => getProjects({ data: { limit: 100, offset: 0 } }),
 });
 
 export const Route = createFileRoute("/_auth/app/")({
@@ -138,7 +138,7 @@ function CreateProjectDialog() {
 	const queryClient = useQueryClient();
 
 	const mutation = useMutation({
-		mutationFn: createProjectApi,
+		mutationFn: (data: { name: string }) => createProject({ data }),
 		onSuccess: (project) => {
 			setCreatedProject(project);
 			queryClient.invalidateQueries({ queryKey: ["projects"] });

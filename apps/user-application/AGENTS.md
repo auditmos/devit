@@ -48,11 +48,10 @@ pnpm run deploy:prod      # deploy to production
 
 `.env` (local) or Cloudflare dashboard:
 - `DATABASE_HOST`, `DATABASE_USERNAME`, `DATABASE_PASSWORD`
-- `BETTER_AUTH_SECRET`
+- `BETTER_AUTH_SECRET`, `BETTER_AUTH_BASE_URL`
 - `CLOUDFLARE_ENV` - dev | staging | production
 - `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` (optional, OAuth)
-- `VITE_DATA_SERVICE_URL` - public API URL
-- `VITE_API_TOKEN` - client-side API auth
+- `DATA_SERVICE_API_TOKEN` - server-side Bearer for service-binding calls to data-service
 
 ## Service Binding (DATA_SERVICE)
 

@@ -6,7 +6,7 @@ import { ChatInput } from "@/components/chat/chat-input";
 import { ChatMessageList } from "@/components/chat/chat-message-list";
 import { SpecTrackingView } from "@/components/spec/spec-tracking-view";
 import { sendChatMessage } from "@/core/functions/chat/binding";
-import { syncGithubIssueStatus } from "@/lib/github-api-client";
+import { syncGithubIssueStatus } from "@/core/functions/github/binding";
 import { chatKeys, chatQueries, projectKeys, projectQueries } from "@/lib/query-keys";
 
 export const Route = createFileRoute("/p/$slug")({
@@ -34,7 +34,7 @@ function SpecTrackingViewWithSync({ slug, view }: { slug: string; view: ClientVi
 	const hasSynced = useRef(false);
 
 	const syncMutation = useMutation({
-		mutationFn: () => syncGithubIssueStatus(slug),
+		mutationFn: () => syncGithubIssueStatus({ data: { slug } }),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: projectKeys.clientView(slug) });
 		},

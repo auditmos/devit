@@ -8,26 +8,26 @@ import { GithubSyncCard } from "@/components/spec/github-sync-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { fetchProject, fetchProjectMessages, fetchProjectTasks } from "@/lib/project-api-client";
+import { getProject, getProjectMessages, getProjectTasks } from "@/core/functions/projects/binding";
 
 function projectQueryOptions(slug: string) {
 	return queryOptions({
 		queryKey: ["projects", slug],
-		queryFn: () => fetchProject(slug),
+		queryFn: () => getProject({ data: { slug } }),
 	});
 }
 
 function messagesQueryOptions(slug: string) {
 	return queryOptions({
 		queryKey: ["projects", slug, "messages"],
-		queryFn: () => fetchProjectMessages(slug),
+		queryFn: () => getProjectMessages({ data: { slug } }),
 	});
 }
 
 function tasksQueryOptions(slug: string) {
 	return queryOptions({
 		queryKey: ["projects", slug, "tasks"],
-		queryFn: () => fetchProjectTasks(slug),
+		queryFn: () => getProjectTasks({ data: { slug } }),
 	});
 }
 

@@ -5,7 +5,6 @@ import { getChatMessages } from "@/core/functions/chat/binding";
 import { getClientBinding, getClientsBinding } from "@/core/functions/clients/binding";
 import { getClientDirect, getClientsDirect } from "@/core/functions/clients/direct";
 import { getClientView } from "@/core/functions/projects/binding";
-import { fetchClient, fetchClients } from "./api-client";
 
 type PaginationParams = { limit: number; offset: number };
 
@@ -67,10 +66,10 @@ function createEntityQueryOptions<TDetail, TList>(config: EntityQueryConfig<TDet
 export const clientKeys = {
 	all: ["clients"] as const,
 	lists: () => [...clientKeys.all, "list"] as const,
-	list: (params: PaginationParams, pattern: "direct" | "binding" | "api") =>
+	list: (params: PaginationParams, pattern: "direct" | "binding") =>
 		[...clientKeys.lists(), params, pattern] as const,
 	details: () => [...clientKeys.all, "detail"] as const,
-	detail: (id: string, pattern: "direct" | "binding" | "api") =>
+	detail: (id: string, pattern: "direct" | "binding") =>
 		[...clientKeys.details(), id, pattern] as const,
 };
 
@@ -93,16 +92,5 @@ export const clientBindingQueries = createEntityQueryOptions<Client | null, Clie
 	fns: {
 		getOne: (id) => getClientBinding({ data: { id } }),
 		getList: (params) => getClientsBinding({ data: params }),
-	},
-});
-
-export const clientApiQueries = createEntityQueryOptions<Client | null, ClientListResponse>({
-	keys: {
-		detail: (id) => clientKeys.detail(id, "api"),
-		list: (params) => clientKeys.list(params, "api"),
-	},
-	fns: {
-		getOne: (id) => fetchClient(id),
-		getList: (params) => fetchClients(params),
 	},
 });

@@ -8,7 +8,7 @@ import {
 	listAvailableRepos,
 	pushTasksToGithub,
 	setProjectGithubRepo,
-} from "@/lib/github-api-client";
+} from "@/core/functions/github/binding";
 
 interface GithubSyncCardProps {
 	project: Project;
@@ -25,14 +25,15 @@ export function GithubSyncCard({ project, tasks }: GithubSyncCardProps) {
 	});
 
 	const setRepoMutation = useMutation({
-		mutationFn: (repo: string) => setProjectGithubRepo(project.slug, repo),
+		mutationFn: (repo: string) =>
+			setProjectGithubRepo({ data: { slug: project.slug, githubRepo: repo } }),
 		onSuccess: (updated) => {
 			queryClient.setQueryData(["projects", project.slug], updated);
 		},
 	});
 
 	const pushMutation = useMutation({
-		mutationFn: () => pushTasksToGithub(project.slug),
+		mutationFn: () => pushTasksToGithub({ data: { slug: project.slug } }),
 		onSuccess: (refreshedTasks) => {
 			queryClient.setQueryData(["projects", project.slug, "tasks"], refreshedTasks);
 		},

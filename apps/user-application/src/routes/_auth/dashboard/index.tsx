@@ -53,21 +53,6 @@ const bindingOps = [
 	},
 ];
 
-const apiOps = [
-	{ label: "Create", href: "/dashboard/api/create" as const, desc: "POST /clients from browser" },
-	{ label: "Read", href: "/dashboard/api" as const, desc: "GET /clients/:id from browser" },
-	{
-		label: "Update",
-		href: "/dashboard/api/update" as const,
-		desc: "PUT /clients/:id from browser",
-	},
-	{
-		label: "Delete",
-		href: "/dashboard/api/delete" as const,
-		desc: "DELETE /clients/:id from browser",
-	},
-];
-
 function DemoIndexPage() {
 	return (
 		<div className="space-y-6">
@@ -82,10 +67,9 @@ function DemoIndexPage() {
 			</div>
 
 			<Tabs defaultValue="direct" className="w-full">
-				<TabsList className="grid w-full grid-cols-3">
+				<TabsList className="grid w-full grid-cols-2">
 					<TabsTrigger value="direct">Direct</TabsTrigger>
 					<TabsTrigger value="binding">Binding</TabsTrigger>
-					<TabsTrigger value="api">API</TabsTrigger>
 				</TabsList>
 
 				<TabsContent value="direct" className="space-y-6 mt-6">
@@ -250,97 +234,6 @@ data-ops queries → Neon Postgres`}
 						</h3>
 						<div className="grid gap-3 md:grid-cols-4">
 							{bindingOps.map((op) => (
-								<Link key={op.href} to={op.href}>
-									<Card className="hover:border-primary transition-colors">
-										<CardHeader className="p-4">
-											<CardTitle className="text-base">{op.label}</CardTitle>
-											<CardDescription className="text-xs">{op.desc}</CardDescription>
-										</CardHeader>
-									</Card>
-								</Link>
-							))}
-						</div>
-					</div>
-				</TabsContent>
-
-				<TabsContent value="api" className="space-y-6 mt-6">
-					<Card>
-						<CardHeader>
-							<div className="flex items-center justify-between">
-								<CardTitle>API Pattern</CardTitle>
-								<Badge variant="secondary">Client Only</Badge>
-							</div>
-							<CardDescription>Browser → fetch → data-service HTTP</CardDescription>
-						</CardHeader>
-						<CardContent className="space-y-4">
-							<pre className="bg-muted text-foreground p-4 rounded text-sm overflow-x-auto">
-								{`Browser (React)
-  │
-  │ 1. useQuery/useMutation calls fetchClients(), etc.
-  │    fetch(VITE_DATA_SERVICE_URL + '/clients')
-  ▼
-Public Internet
-  │
-  │ 2. HTTP request (crosses network, requires CORS)
-  ▼
-data-service (Hono API)
-  │
-  │ 3. CORS check → authMiddleware → zValidator → clientService
-  ▼
-data-ops queries → Neon Postgres`}
-							</pre>
-
-							<div className="grid md:grid-cols-2 gap-4">
-								<div>
-									<h4 className="font-semibold text-foreground mb-2">Pros</h4>
-									<ul className="text-sm list-disc list-inside space-y-1 text-muted-foreground">
-										<li>Standard HTTP - works from any client</li>
-										<li>Shared API with mobile apps</li>
-										<li>CORS-enabled for third parties</li>
-										<li>CDN cacheable responses</li>
-									</ul>
-								</div>
-								<div>
-									<h4 className="font-semibold text-foreground mb-2">Cons</h4>
-									<ul className="text-sm list-disc list-inside space-y-1 text-muted-foreground">
-										<li>No SSR support</li>
-										<li>Client manages auth tokens</li>
-										<li>Network latency (public internet)</li>
-										<li>Loading states visible to users</li>
-									</ul>
-								</div>
-							</div>
-
-							<div className="space-y-2">
-								<div className="bg-muted p-3 rounded">
-									<p className="text-sm text-foreground">
-										<span className="font-semibold">Use when:</span> Mobile apps, third-party
-										integrations, public API consumers
-									</p>
-								</div>
-								<div className="bg-muted p-3 rounded">
-									<p className="text-sm text-foreground">
-										<span className="font-semibold">Avoid when:</span> Need SSR, sensitive
-										operations, internal-only features
-									</p>
-								</div>
-								<div className="bg-destructive/10 p-3 rounded">
-									<p className="text-sm text-foreground">
-										<span className="font-semibold">Security:</span> API tokens used in browser are
-										visible to users. Use for public data or implement proper authentication for
-										sensitive ops.
-									</p>
-								</div>
-							</div>
-						</CardContent>
-					</Card>
-
-					<div>
-						<h3 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl mb-4">
-							CRUD Operations
-						</h3>
-						<div className="grid gap-3 md:grid-cols-4">
-							{apiOps.map((op) => (
 								<Link key={op.href} to={op.href}>
 									<Card className="hover:border-primary transition-colors">
 										<CardHeader className="p-4">
