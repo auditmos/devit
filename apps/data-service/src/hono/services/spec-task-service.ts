@@ -17,6 +17,13 @@ import {
 	updateTask as updateTaskQuery,
 } from "@repo/data-ops/project";
 import type { Result } from "../types/result";
+import type { createRepo } from "./github-client";
+
+export interface ApproveSpecDeps {
+	token: string;
+	org: string;
+	createRepo: typeof createRepo;
+}
 
 export async function setProjectRepo(
 	slug: string,
@@ -145,11 +152,12 @@ export async function reorderTasks(slug: string, taskIds: string[]): Promise<Res
 	return { ok: true, data: reordered };
 }
 
-export async function approveSpec(slug: string): Promise<Result<null>> {
+export async function approveSpec(slug: string, deps: ApproveSpecDeps): Promise<Result<null>> {
 	const projectResult = await resolveProject(slug);
 	if (!projectResult.ok) return projectResult;
 
-	if (projectResult.data.status !== "review")
+	const project = projectResult.data;
+	if (project.status !== "review")
 		return {
 			ok: false,
 			error: {
@@ -159,6 +167,22 @@ export async function approveSpec(slug: string): Promise<Result<null>> {
 			},
 		};
 
-	await updateProjectStatus(projectResult.data.id, "active");
+	await updateProjectStatus(project.id, "active");
+
+	if (project.githubRepo === null) {
+		const repoResult = await deps.createRepo(deps.token, deps.org, project.slug);
+		if (repoResult.ok) {
+			await updateProjectGithubRepoQuery(project.id, repoResult.data.fullName);
+		} else {
+			// biome-ignore lint/suspicious/noConsole: structured failure log; createRepo failure must not roll back approval
+			console.error({
+				event: "approveSpec.createRepo.failed",
+				slug: project.slug,
+				status: repoResult.error.status,
+				githubError: repoResult.error.code,
+			});
+		}
+	}
+
 	return { ok: true, data: null };
 }

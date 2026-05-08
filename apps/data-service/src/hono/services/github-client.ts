@@ -53,6 +53,71 @@ export async function listRepos(token: string): Promise<Result<GithubRepo[]>> {
 	};
 }
 
+export async function createRepo(
+	token: string,
+	org: string,
+	name: string,
+	options: { description?: string } = {},
+): Promise<Result<GithubRepo>> {
+	const first = await postCreateRepo(token, org, name, options);
+	if (first.status !== 422) return parseCreateRepoResponse(first);
+
+	const retryName = `${name}-${randomSuffix()}`;
+	const second = await postCreateRepo(token, org, retryName, options);
+	return parseCreateRepoResponse(second);
+}
+
+async function postCreateRepo(
+	token: string,
+	org: string,
+	name: string,
+	options: { description?: string },
+): Promise<Response> {
+	return fetch(`${GITHUB_API_BASE}/orgs/${org}/repos`, {
+		method: "POST",
+		headers: { ...authHeaders(token), "Content-Type": "application/json" },
+		body: JSON.stringify({
+			name,
+			private: true,
+			description: options.description,
+			auto_init: false,
+		}),
+	});
+}
+
+async function parseCreateRepoResponse(response: Response): Promise<Result<GithubRepo>> {
+	if (response.status === 401) return unauthorizedError();
+	if (response.status === 422) {
+		return {
+			ok: false,
+			error: {
+				code: "GITHUB_REPO_NAME_TAKEN",
+				message: "Repository name is already taken",
+				status: 422,
+			},
+		};
+	}
+	const body = (await response.json()) as {
+		full_name: string;
+		default_branch: string;
+		private: boolean;
+	};
+	return {
+		ok: true,
+		data: {
+			fullName: body.full_name,
+			defaultBranch: body.default_branch,
+			private: body.private,
+		},
+	};
+}
+
+function randomSuffix(): string {
+	const bytes = new Uint8Array(2);
+	crypto.getRandomValues(bytes);
+	return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
 export async function createIssue(
 	token: string,
 	repoFullName: string,

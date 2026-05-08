@@ -10,6 +10,7 @@ import {
 } from "@repo/data-ops/project";
 import { Hono } from "hono";
 import { authMiddleware } from "../middleware/auth";
+import { createRepo } from "../services/github-client";
 import * as specTaskService from "../services/spec-task-service";
 import { resultToResponse } from "../utils/response";
 
@@ -118,7 +119,11 @@ specTasks.post(
 	zValidator("param", SlugParamSchema),
 	async (c) => {
 		const { slug } = c.req.valid("param");
-		const result = await specTaskService.approveSpec(slug);
+		const result = await specTaskService.approveSpec(slug, {
+			token: c.env.GITHUB_TOKEN,
+			org: c.env.GITHUB_ORG,
+			createRepo,
+		});
 		if (!result.ok) return resultToResponse(c, result);
 		return c.body(null, 204);
 	},

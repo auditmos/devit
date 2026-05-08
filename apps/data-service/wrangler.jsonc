@@ -17,7 +17,10 @@
 		 * Local / Development environment
 		 */
 		"dev": {
-			"name": "devit-ds-dev"
+			"name": "devit-ds-dev",
+			"vars": {
+				"GITHUB_ORG": "auditmos-projects"
+			}
 			// "kv_namespaces": [
 			//   {
 			//     "binding": "CACHE",
@@ -53,7 +56,10 @@
 			//     "custom_domain": true
 			//   }
 			// ],
-			"name": "devit-ds-staging"
+			"name": "devit-ds-staging",
+			"vars": {
+				"GITHUB_ORG": "auditmos-projects"
+			}
 			// "kv_namespaces": [
 			//   {
 			//     "binding": "CACHE",
@@ -89,7 +95,10 @@
 			//     "custom_domain": true
 			//   }
 			// ],
-			"name": "devit-ds-production"
+			"name": "devit-ds-production",
+			"vars": {
+				"GITHUB_ORG": "auditmos-projects"
+			}
 			// "kv_namespaces": [
 			//   {
 			//     "binding": "CACHE",

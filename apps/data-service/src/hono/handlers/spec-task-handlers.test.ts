@@ -8,20 +8,40 @@ import {
 	type Project,
 	type Spec,
 	type Task,
+	updateProjectGithubRepo,
 	updateProjectStatus,
 } from "@repo/data-ops/project";
+import { afterEach, vi } from "vitest";
 import { App } from "../app";
 
 const TEST_ENV = {
 	API_TOKEN: "test-token",
 	ANTHROPIC_API_KEY: "test-anthropic-key",
 	GITHUB_TOKEN: "ghp_test_token",
+	GITHUB_ORG: "auditmos-projects",
 	DATABASE_HOST: process.env.DATABASE_HOST!,
 	DATABASE_USERNAME: process.env.DATABASE_USERNAME!,
 	DATABASE_PASSWORD: process.env.DATABASE_PASSWORD!,
 	CLOUDFLARE_ENV: "dev",
 	ALLOWED_ORIGINS: "",
 } as unknown as Env;
+
+afterEach(() => {
+	vi.restoreAllMocks();
+});
+
+function mockGithubFetch(
+	handler: (url: string, init: RequestInit | undefined) => Response | Promise<Response>,
+) {
+	const original = globalThis.fetch;
+	vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
+		const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+		if (url.startsWith("https://api.github.com")) {
+			return handler(url, init);
+		}
+		return original(input, init);
+	});
+}
 
 const createdIds: string[] = [];
 
@@ -391,9 +411,16 @@ describe("GET /projects/:slug/client-view", () => {
 // ============================================
 
 describe("POST /projects/:slug/approve", () => {
-	it("transitions project from review to active", async () => {
+	it("transitions project from review to active (skips repo creation when githubRepo already set)", async () => {
 		await setupProjectWithSpec();
 		const project = await setupProject("review");
+		await updateProjectGithubRepo(project.id, "client/their-repo");
+
+		const githubFetchSpy = vi.fn();
+		mockGithubFetch((url, init) => {
+			githubFetchSpy(url, init);
+			return new Response("{}", { status: 500 });
+		});
 
 		const res = await App.request(
 			`/projects/${project.slug}/approve`,
@@ -407,6 +434,68 @@ describe("POST /projects/:slug/approve", () => {
 
 		const updated = await getProjectBySlug(project.slug);
 		expect(updated?.status).toBe("active");
+		expect(updated?.githubRepo).toBe("client/their-repo");
+		expect(githubFetchSpy).not.toHaveBeenCalled();
+	});
+
+	it("auto-creates a private repo under GITHUB_ORG when project has no githubRepo and persists the full_name", async () => {
+		const project = await setupProject("review");
+
+		mockGithubFetch((url) => {
+			expect(url).toBe("https://api.github.com/orgs/auditmos-projects/repos");
+			return new Response(
+				JSON.stringify({
+					full_name: `auditmos-projects/${project.slug}`,
+					default_branch: "main",
+					private: true,
+				}),
+				{ status: 201, headers: { "content-type": "application/json" } },
+			);
+		});
+
+		const res = await App.request(
+			`/projects/${project.slug}/approve`,
+			{
+				method: "POST",
+				headers: authHeaders(),
+			},
+			TEST_ENV,
+		);
+		expect(res.status).toBe(204);
+
+		const updated = await getProjectBySlug(project.slug);
+		expect(updated?.status).toBe("active");
+		expect(updated?.githubRepo).toBe(`auditmos-projects/${project.slug}`);
+	});
+
+	it("still completes approval (204) when createRepo fails, leaving githubRepo null", async () => {
+		const project = await setupProject("review");
+		const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+		mockGithubFetch(() => {
+			return new Response(
+				JSON.stringify({
+					message: "Validation Failed",
+					errors: [{ resource: "Repository", code: "custom", field: "name" }],
+				}),
+				{ status: 422, headers: { "content-type": "application/json" } },
+			);
+		});
+
+		const res = await App.request(
+			`/projects/${project.slug}/approve`,
+			{
+				method: "POST",
+				headers: authHeaders(),
+			},
+			TEST_ENV,
+		);
+		expect(res.status).toBe(204);
+
+		const updated = await getProjectBySlug(project.slug);
+		expect(updated?.status).toBe("active");
+		expect(updated?.githubRepo).toBeNull();
+		expect(errorSpy).toHaveBeenCalled();
 	});
 
 	it("returns 409 when project is not in review status", async () => {
