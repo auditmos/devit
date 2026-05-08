@@ -28,14 +28,18 @@ export function EmailAuth({ mode }: EmailAuthProps) {
 					email: data.email,
 					password: data.password,
 				});
-				if (result.error) throw new Error(result.error.message);
+				if (result.error) {
+					throw new Error(result.error.message || result.error.code || "Sign-up failed");
+				}
 				return { mode: "signup" as const };
 			}
 			const result = await authClient.signIn.email({
 				email: data.email,
 				password: data.password,
 			});
-			if (result.error) throw new Error(result.error.message);
+			if (result.error) {
+				throw new Error(result.error.message || result.error.code || "Sign-in failed");
+			}
 			return { mode: "signin" as const };
 		},
 	});
@@ -90,7 +94,7 @@ export function EmailAuth({ mode }: EmailAuthProps) {
 					{mutation.isError && (
 						<Alert variant="destructive">
 							<AlertDescription>
-								{(mutation.error as AuthError).message ?? "Something went wrong"}
+								{(mutation.error as AuthError).message || "Something went wrong"}
 							</AlertDescription>
 						</Alert>
 					)}

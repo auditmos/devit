@@ -3,7 +3,7 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"dev": "vite dev --port 3000",
+		"dev": "vite dev --mode dev --port 3000",
 		"build": "vite build",
 		"build:staging": "vite build --mode staging",
 		"build:production": "vite build --mode production",

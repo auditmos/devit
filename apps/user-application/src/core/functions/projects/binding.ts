@@ -114,3 +114,14 @@ export const getProjectTasks = createServerFn()
 		if (!response.ok) await throwOnError(response, "Failed to fetch project tasks");
 		return z.array(TaskSchema).parse(await response.json());
 	});
+
+export const deleteProject = createServerFn({ method: "POST" })
+	.inputValidator((data: z.infer<typeof SlugInput>) => SlugInput.parse(data))
+	.handler(async (ctx): Promise<void> => {
+		const response = await makeAuthBindingRequest(`/projects/${ctx.data.slug}`, {
+			method: "DELETE",
+		});
+		if (!response.ok && response.status !== 204) {
+			await throwOnError(response, "Failed to delete project");
+		}
+	});

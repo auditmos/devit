@@ -1,6 +1,7 @@
 import type { PaginationRequest } from "@repo/data-ops/client";
 import {
 	createProject as createProjectQuery,
+	deleteProject as deleteProjectQuery,
 	getMessagesByProjectId,
 	getProjectBySlug as getProjectBySlugQuery,
 	getProjects as getProjectsQuery,
@@ -64,4 +65,20 @@ export async function getProjectMessages(slug: string): Promise<Result<MessageLi
 		};
 	const data = await getMessagesByProjectId(project.id);
 	return { ok: true, data: { data } };
+}
+
+export async function deleteProject(slug: string): Promise<Result<null>> {
+	const project = await getProjectBySlugQuery(slug);
+	if (!project)
+		return {
+			ok: false,
+			error: { code: "NOT_FOUND", message: "Project not found", status: 404 },
+		};
+	const deleted = await deleteProjectQuery(project.id);
+	if (!deleted)
+		return {
+			ok: false,
+			error: { code: "DELETE_FAILED", message: "Failed to delete project", status: 500 },
+		};
+	return { ok: true, data: null };
 }

@@ -2,9 +2,9 @@ import type { Project } from "@repo/data-ops/project";
 import { useForm } from "@tanstack/react-form";
 import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Calendar, ExternalLink, MessageSquare, Plus } from "lucide-react";
+import { Calendar, ExternalLink, MessageSquare, Plus, Trash2 } from "lucide-react";
 import { Suspense, useState } from "react";
-import { Alert } from "@/components/ui/alert";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,7 +18,7 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { createProject, getProjects } from "@/core/functions/projects/binding";
+import { createProject, deleteProject, getProjects } from "@/core/functions/projects/binding";
 
 const projectsQueryOptions = queryOptions({
 	queryKey: ["projects", { limit: 100, offset: 0 }],
@@ -66,6 +66,28 @@ function ProjectDashboard() {
 function ProjectList() {
 	const { data } = useSuspenseQuery(projectsQueryOptions);
 	const navigate = useNavigate();
+	const queryClient = useQueryClient();
+	const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
+
+	const deleteMutation = useMutation({
+		mutationFn: (slug: string) => deleteProject({ data: { slug } }),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["projects"] });
+			setProjectToDelete(null);
+		},
+	});
+
+	const handleConfirmDelete = () => {
+		if (!projectToDelete) return;
+		deleteMutation.mutate(projectToDelete.slug);
+	};
+
+	const handleDialogChange = (open: boolean) => {
+		if (!open) {
+			setProjectToDelete(null);
+			deleteMutation.reset();
+		}
+	};
 
 	if (data.data.length === 0) {
 		return (
@@ -80,36 +102,86 @@ function ProjectList() {
 	}
 
 	return (
-		<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-			{data.data.map((project: Project) => (
-				<Card
-					key={project.id}
-					className="cursor-pointer transition-colors hover:bg-accent/50"
-					onClick={() => navigate({ to: "/app/projects/$slug", params: { slug: project.slug } })}
-				>
-					<CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
-						<CardTitle className="text-base font-semibold text-foreground">
-							{project.name}
-						</CardTitle>
-						<Badge variant={STATUS_BADGE_VARIANT[project.status] ?? "secondary"}>
-							{project.status}
-						</Badge>
-					</CardHeader>
-					<CardContent>
-						<div className="flex items-center gap-4 text-sm text-muted-foreground">
-							<div className="flex items-center gap-1">
-								<Calendar className="h-3.5 w-3.5" />
-								{formatDate(project.createdAt)}
+		<>
+			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+				{data.data.map((project: Project) => (
+					<Card
+						key={project.id}
+						className="cursor-pointer transition-colors hover:bg-accent/50"
+						onClick={() => navigate({ to: "/app/projects/$slug", params: { slug: project.slug } })}
+					>
+						<CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
+							<CardTitle className="text-base font-semibold text-foreground">
+								{project.name}
+							</CardTitle>
+							<div className="flex items-center gap-2">
+								<Badge variant={STATUS_BADGE_VARIANT[project.status] ?? "secondary"}>
+									{project.status}
+								</Badge>
+								<Button
+									variant="ghost"
+									size="icon"
+									className="h-7 w-7 text-muted-foreground hover:text-destructive"
+									aria-label={`Delete ${project.name}`}
+									onClick={(e) => {
+										e.stopPropagation();
+										deleteMutation.reset();
+										setProjectToDelete(project);
+									}}
+								>
+									<Trash2 className="h-3.5 w-3.5" />
+								</Button>
 							</div>
-							<div className="flex items-center gap-1">
-								<ExternalLink className="h-3.5 w-3.5" />
-								<span className="font-mono text-xs">{project.slug}</span>
+						</CardHeader>
+						<CardContent>
+							<div className="flex items-center gap-4 text-sm text-muted-foreground">
+								<div className="flex items-center gap-1">
+									<Calendar className="h-3.5 w-3.5" />
+									{formatDate(project.createdAt)}
+								</div>
+								<div className="flex items-center gap-1">
+									<ExternalLink className="h-3.5 w-3.5" />
+									<span className="font-mono text-xs">{project.slug}</span>
+								</div>
 							</div>
-						</div>
-					</CardContent>
-				</Card>
-			))}
-		</div>
+						</CardContent>
+					</Card>
+				))}
+			</div>
+
+			<Dialog open={!!projectToDelete} onOpenChange={handleDialogChange}>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>Delete project?</DialogTitle>
+						<DialogDescription>
+							This will permanently remove "{projectToDelete?.name}" and all its messages and tasks.
+							This action cannot be undone.
+						</DialogDescription>
+					</DialogHeader>
+					{deleteMutation.isError && (
+						<Alert variant="destructive">
+							<AlertDescription>{deleteMutation.error.message}</AlertDescription>
+						</Alert>
+					)}
+					<DialogFooter>
+						<Button
+							variant="outline"
+							onClick={() => handleDialogChange(false)}
+							disabled={deleteMutation.isPending}
+						>
+							Cancel
+						</Button>
+						<Button
+							variant="destructive"
+							onClick={handleConfirmDelete}
+							disabled={deleteMutation.isPending}
+						>
+							{deleteMutation.isPending ? "Deleting..." : "Delete"}
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
+		</>
 	);
 }
 
@@ -162,7 +234,7 @@ function CreateProjectDialog() {
 		}
 	};
 
-	const clientLink = createdProject ? `${window.location.origin}/${createdProject.slug}` : "";
+	const clientLink = createdProject ? `${window.location.origin}/p/${createdProject.slug}` : "";
 
 	return (
 		<Dialog open={open} onOpenChange={handleOpenChange}>
