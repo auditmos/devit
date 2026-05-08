@@ -3,10 +3,12 @@ import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, Bot, Calendar, MessageSquare, User } from "lucide-react";
 import { Suspense } from "react";
+import { AdminTaskList } from "@/components/spec/admin-task-list";
+import { GithubSyncCard } from "@/components/spec/github-sync-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { fetchProject, fetchProjectMessages } from "@/lib/project-api-client";
+import { fetchProject, fetchProjectMessages, fetchProjectTasks } from "@/lib/project-api-client";
 
 function projectQueryOptions(slug: string) {
 	return queryOptions({
@@ -22,11 +24,19 @@ function messagesQueryOptions(slug: string) {
 	});
 }
 
+function tasksQueryOptions(slug: string) {
+	return queryOptions({
+		queryKey: ["projects", slug, "tasks"],
+		queryFn: () => fetchProjectTasks(slug),
+	});
+}
+
 export const Route = createFileRoute("/_auth/app/projects/$slug")({
 	loader: async ({ params, context }) => {
 		await Promise.all([
 			context.queryClient.ensureQueryData(projectQueryOptions(params.slug)),
 			context.queryClient.ensureQueryData(messagesQueryOptions(params.slug)),
+			context.queryClient.ensureQueryData(tasksQueryOptions(params.slug)),
 		]);
 	},
 	component: ProjectDetailPage,
@@ -70,6 +80,8 @@ function ProjectDetailPage() {
 
 			<Suspense fallback={<ProjectDetailSkeleton />}>
 				<ProjectHeader slug={slug} />
+				<GithubSyncSection slug={slug} />
+				<TasksSection slug={slug} />
 				<ConversationViewer slug={slug} />
 			</Suspense>
 		</div>
@@ -108,6 +120,26 @@ function ProjectHeader({ slug }: { slug: string }) {
 			</CardHeader>
 		</Card>
 	);
+}
+
+const GITHUB_VISIBLE_STATUSES = new Set(["review", "active"]);
+
+function GithubSyncSection({ slug }: { slug: string }) {
+	const { data: project } = useSuspenseQuery(projectQueryOptions(slug));
+	const { data: tasks } = useSuspenseQuery(tasksQueryOptions(slug));
+
+	if (!project || !GITHUB_VISIBLE_STATUSES.has(project.status)) return null;
+
+	return <GithubSyncCard project={project} tasks={tasks} />;
+}
+
+function TasksSection({ slug }: { slug: string }) {
+	const { data: project } = useSuspenseQuery(projectQueryOptions(slug));
+	const { data: tasks } = useSuspenseQuery(tasksQueryOptions(slug));
+
+	if (!project) return null;
+
+	return <AdminTaskList tasks={tasks} />;
 }
 
 function ConversationViewer({ slug }: { slug: string }) {

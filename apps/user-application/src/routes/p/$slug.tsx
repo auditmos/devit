@@ -1,10 +1,13 @@
+import type { ClientViewResponse } from "@repo/data-ops/project";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useRef } from "react";
 import { ChatInput } from "@/components/chat/chat-input";
 import { ChatMessageList } from "@/components/chat/chat-message-list";
 import { SpecTrackingView } from "@/components/spec/spec-tracking-view";
 import { sendChatMessage } from "@/core/functions/chat/binding";
-import { chatKeys, chatQueries, projectQueries } from "@/lib/query-keys";
+import { syncGithubIssueStatus } from "@/lib/github-api-client";
+import { chatKeys, chatQueries, projectKeys, projectQueries } from "@/lib/query-keys";
 
 export const Route = createFileRoute("/p/$slug")({
 	loader: async ({ context, params }) => {
@@ -20,10 +23,33 @@ function ProjectPage() {
 	if (!view) return null;
 
 	if (view.project.status === "active" || view.project.status === "complete") {
-		return <SpecTrackingView view={view} />;
+		return <SpecTrackingViewWithSync slug={slug} view={view} />;
 	}
 
 	return <ChatPage slug={slug} />;
+}
+
+function SpecTrackingViewWithSync({ slug, view }: { slug: string; view: ClientViewResponse }) {
+	const queryClient = useQueryClient();
+	const hasSynced = useRef(false);
+
+	const syncMutation = useMutation({
+		mutationFn: () => syncGithubIssueStatus(slug),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: projectKeys.clientView(slug) });
+		},
+	});
+
+	const hasLinkedIssues = view.tasks.some((t) => t.githubIssueNumber !== null);
+
+	useEffect(() => {
+		if (hasSynced.current) return;
+		if (!hasLinkedIssues) return;
+		hasSynced.current = true;
+		syncMutation.mutate();
+	}, [hasLinkedIssues, syncMutation]);
+
+	return <SpecTrackingView view={view} />;
 }
 
 function ChatPage({ slug }: { slug: string }) {

@@ -5,6 +5,7 @@ import type {
 	Project,
 	ProjectCreateInput,
 	ProjectListResponse,
+	Task,
 } from "@repo/data-ops/project";
 import { AppError } from "@/core/errors";
 
@@ -68,6 +69,15 @@ export async function fetchProjectMessages(slug: string): Promise<MessageListRes
 	});
 
 	return handleResponse<MessageListResponse>(response);
+}
+
+export async function fetchProjectTasks(slug: string): Promise<Task[]> {
+	const response = await fetch(`${API_URL}/projects/${slug}/tasks`, {
+		method: "GET",
+		headers: getHeaders(),
+	});
+
+	return handleResponse<Task[]>(response);
 }
 
 export async function fetchClientView(slug: string): Promise<ClientViewResponse> {

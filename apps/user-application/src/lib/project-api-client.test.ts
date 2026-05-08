@@ -5,10 +5,49 @@ import {
 	fetchProject,
 	fetchProjectMessages,
 	fetchProjects,
+	fetchProjectTasks,
 } from "./project-api-client";
 
 const mockFetch = vi.fn();
 globalThis.fetch = mockFetch;
+
+describe("fetchProjectTasks", () => {
+	it("fetches the task list for a project by slug", async () => {
+		const mockTasks = [
+			{
+				id: "t1",
+				projectId: "p1",
+				title: "Task A",
+				description: null,
+				status: "pending",
+				githubIssueNumber: null,
+				githubIssueUrl: null,
+				sortOrder: 0,
+				createdAt: "2026-04-01T00:00:00Z",
+			},
+		];
+		mockFetch.mockResolvedValueOnce(new Response(JSON.stringify(mockTasks), { status: 200 }));
+
+		const result = await fetchProjectTasks("test-abc");
+
+		expect(result).toHaveLength(1);
+		expect(result[0]?.title).toBe("Task A");
+		expect(mockFetch).toHaveBeenCalledWith(
+			expect.stringContaining("/projects/test-abc/tasks"),
+			expect.objectContaining({ method: "GET" }),
+		);
+	});
+
+	it("throws AppError on 404", async () => {
+		mockFetch.mockResolvedValueOnce(
+			new Response(JSON.stringify({ message: "Project not found", code: "NOT_FOUND" }), {
+				status: 404,
+			}),
+		);
+
+		await expect(fetchProjectTasks("nonexistent")).rejects.toThrow(AppError);
+	});
+});
 
 describe("fetchClientView", () => {
 	it("fetches client view payload by slug", async () => {
