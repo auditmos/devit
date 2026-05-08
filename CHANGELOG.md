@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/auditmos/devit/compare/v1.4.0...v1.5.0) (2026-05-08)
+
+
+### Features
+
+* auto-create GitHub repo on spec approval for issue [#12](https://github.com/auditmos/devit/issues/12) ([9c77d9c](https://github.com/auditmos/devit/commit/9c77d9c190bc8537b487a5a18fa6db3bb58a7f67))
+
 # [1.4.0](https://github.com/auditmos/devit/compare/v1.3.0...v1.4.0) (2026-05-07)
 
 
