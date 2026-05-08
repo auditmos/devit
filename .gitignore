@@ -140,6 +140,9 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
+# Cloudflare Wrangler local state (runtime cache, dev sessions)
+.wrangler/
+
 # E2E test artifacts
 e2e/calibration/
 e2e/state/
