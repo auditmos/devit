@@ -21,7 +21,7 @@
 		"init-project": "tsx scripts/init-project.ts",
 		"knip": "knip",
 		"deps": "taze",
-		"deps:update": "taze -w",
+		"deps:update": "taze -r -w",
 		"deps:major": "taze major",
 		"deps:major:update": "taze major -w",
 		"test": "vitest run",
@@ -33,18 +33,18 @@
 	"keywords": [],
 	"author": "",
 	"license": "ISC",
-	"packageManager": "pnpm@10.32.1",
+	"packageManager": "pnpm@10.33.4",
 	"devDependencies": {
 		"@biomejs/biome": "2.4.4",
 		"@semantic-release/changelog": "^6.0.3",
 		"@semantic-release/git": "^10.0.1",
-		"@types/node": "^22.19.15",
-		"@vitest/coverage-v8": "^4.1.0",
-		"knip": "^5.86.0",
+		"@types/node": "^22.19.18",
+		"@vitest/coverage-v8": "^4.1.5",
+		"knip": "^5.88.1",
 		"semantic-release": "^25.0.3",
-		"taze": "^19.10.0",
+		"taze": "^19.11.0",
 		"tsx": "^4.21.0",
 		"typescript": "^5.9.3",
-		"vitest": "^4.1.0"
+		"vitest": "^4.1.5"
 	}
 }
