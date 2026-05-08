@@ -8,12 +8,12 @@ import {
 import type { Result } from "../types/result";
 import type { createIssue, getIssue } from "./github-client";
 
-export interface PushDeps {
+interface PushDeps {
 	token: string;
 	createIssue: typeof createIssue;
 }
 
-export interface SyncDeps {
+interface SyncDeps {
 	token: string;
 	getIssue: typeof getIssue;
 }

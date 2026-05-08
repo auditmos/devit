@@ -5,7 +5,7 @@ import { AppError } from "@/core/errors";
 const API_URL = import.meta.env.VITE_DATA_SERVICE_URL || "http://localhost:8788";
 const API_TOKEN = import.meta.env.VITE_API_TOKEN;
 
-export interface GithubRepo {
+interface GithubRepo {
 	fullName: string;
 	defaultBranch: string;
 	private: boolean;

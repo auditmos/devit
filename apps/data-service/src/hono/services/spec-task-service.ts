@@ -19,7 +19,7 @@ import {
 import type { Result } from "../types/result";
 import type { createRepo } from "./github-client";
 
-export interface ApproveSpecDeps {
+interface ApproveSpecDeps {
 	token: string;
 	org: string;
 	createRepo: typeof createRepo;

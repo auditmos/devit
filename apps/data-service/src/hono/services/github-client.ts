@@ -1,12 +1,12 @@
 import type { Result } from "../types/result";
 
-export interface GithubRepo {
+interface GithubRepo {
 	fullName: string;
 	defaultBranch: string;
 	private: boolean;
 }
 
-export interface GithubIssue {
+interface GithubIssue {
 	number: number;
 	htmlUrl: string;
 	state: "open" | "closed";
