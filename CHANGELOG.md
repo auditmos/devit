@@ -1,3 +1,10 @@
+# [1.7.0](https://github.com/auditmos/devit/compare/v1.6.1...v1.7.0) (2026-05-08)
+
+
+### Features
+
+* **user-application:** project delete + signin UX fixes ([cd752b5](https://github.com/auditmos/devit/commit/cd752b5c1811dbc3b1c1cc289e55bdbeb10f407c))
+
 ## [1.6.1](https://github.com/auditmos/devit/compare/v1.6.0...v1.6.1) (2026-05-08)
 
 # [1.6.0](https://github.com/auditmos/devit/compare/v1.5.0...v1.6.0) (2026-05-08)
